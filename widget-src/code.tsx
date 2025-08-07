@@ -9,9 +9,18 @@ interface Vote {
 }
 
 interface SessionState {
-  status: 'waiting' | 'voting'
+  status: 'waiting' | 'voting' | 'revealed'
   facilitatorId: string
   participants: string[]
+}
+
+interface VoteResult {
+  value: number | string
+  participants: Array<{
+    name: string
+    userId: string
+  }>
+  count: number
 }
 
 const FIBONACCI_CARDS = [
@@ -62,10 +71,80 @@ function EstimationCard({ value, title, emoji, isSelected, onClick }: {
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#666666"}
         width="fill-parent"
-        textAlignVertical="center"
       >
         {title}
       </Text>
+    </AutoLayout>
+  )
+}
+
+function ResultsView({ 
+  voteResults, 
+  onReset 
+}: { 
+  voteResults: VoteResult[]
+  onReset: () => void
+}) {
+  return (
+    <AutoLayout
+      direction="vertical"
+      spacing={16}
+      padding={16}
+      fill="#FFFFFF"
+      cornerRadius={12}
+      stroke="#E6E6E6"
+      width={420}
+    >
+      <Text fontSize={18} fontWeight="bold" horizontalAlignText="center">
+        🎯 Results Revealed
+      </Text>
+      
+      <Text fontSize={14} fill="#666666" horizontalAlignText="center">
+        Here's how everyone voted:
+      </Text>
+      
+      <AutoLayout direction="vertical" spacing={12}>
+        {voteResults.map(result => (
+          <AutoLayout
+            key={result.value}
+            direction="vertical"
+            spacing={6}
+            padding={12}
+            fill="#F8F9FA"
+            cornerRadius={6}
+            width="fill-parent"
+          >
+            <AutoLayout direction="horizontal" spacing={8} horizontalAlignItems="center">
+              <Text fontSize={16} fontWeight="bold">
+                {result.value}
+              </Text>
+              <Text fontSize={12} fill="#666666">
+                ({result.count} vote{result.count !== 1 ? 's' : ''})
+              </Text>
+            </AutoLayout>
+            <AutoLayout direction="vertical" spacing={2}>
+              {result.participants.map(participant => (
+                <Text key={participant.userId} fontSize={12} fill="#333333">
+                  • {participant.name}
+                </Text>
+              ))}
+            </AutoLayout>
+          </AutoLayout>
+        ))}
+      </AutoLayout>
+      
+      {/* Reset Button for Facilitator */}
+      <AutoLayout
+        padding={{ vertical: 12, horizontal: 24 }}
+        fill="#007AFF"
+        cornerRadius={8}
+        onClick={onReset}
+        horizontalAlignItems="center"
+      >
+        <Text fontSize={14} fill="#FFFFFF" fontWeight="bold">
+          Start New Round
+        </Text>
+      </AutoLayout>
     </AutoLayout>
   )
 }
@@ -126,6 +205,77 @@ function Widget() {
     }
   }
 
+  const revealResults = () => {
+    try {
+      // Only facilitator can reveal results
+      const currentUserId = figma.currentUser?.id || sessionState.facilitatorId
+      if (currentUserId === sessionState.facilitatorId) {
+        console.log('Revealing results')
+        setSessionState({
+          ...sessionState,
+          status: 'revealed'
+        })
+      }
+    } catch (error) {
+      console.error('Error revealing results:', error)
+    }
+  }
+
+  const resetSession = () => {
+    try {
+      // Only facilitator can reset
+      const currentUserId = figma.currentUser?.id || sessionState.facilitatorId
+      if (currentUserId === sessionState.facilitatorId) {
+        console.log('Resetting session')
+        // Clear all votes
+        votes.keys().forEach(key => votes.delete(key))
+        setSessionState({
+          ...sessionState,
+          status: 'voting'
+        })
+        setCount(0)
+      }
+    } catch (error) {
+      console.error('Error resetting session:', error)
+    }
+  }
+
+  const groupVotesByValue = (): VoteResult[] => {
+    const grouped = new Map<number | string, VoteResult>()
+    
+    votes.keys().forEach(key => {
+      const vote = votes.get(key)
+      if (!vote) return
+      const existing = grouped.get(vote.value)
+      if (existing) {
+        existing.participants.push({
+          name: vote.userName,
+          userId: vote.userId
+        })
+        existing.count++
+      } else {
+        grouped.set(vote.value, {
+          value: vote.value,
+          participants: [{
+            name: vote.userName,
+            userId: vote.userId
+          }],
+          count: 1
+        })
+      }
+    })
+    
+    return Array.from(grouped.values()).sort((a, b) => {
+      // Sort by value (numbers first, then strings)
+      if (typeof a.value === 'number' && typeof b.value === 'number') {
+        return a.value - b.value
+      }
+      if (typeof a.value === 'number') return -1
+      if (typeof b.value === 'number') return 1
+      return String(a.value).localeCompare(String(b.value))
+    })
+  }
+
   if (sessionState.status === 'waiting') {
     return (
       <AutoLayout
@@ -158,6 +308,15 @@ function Widget() {
     )
   }
 
+  if (sessionState.status === 'revealed') {
+    return (
+      <ResultsView
+        voteResults={groupVotesByValue()}
+        onReset={resetSession}
+      />
+    )
+  }
+
   return (
     <AutoLayout
       direction="vertical"
@@ -180,6 +339,22 @@ function Widget() {
       <Text fontSize={10} fill="#999999">
         Status: {sessionState.status} | Participants: {sessionState.participants.length}
       </Text>
+      
+      {/* Facilitator Controls */}
+      {sessionState.facilitatorId === sessionState.facilitatorId && (
+        <AutoLayout direction="horizontal" spacing={8}>
+          <AutoLayout
+            padding={{ vertical: 8, horizontal: 16 }}
+            fill="#28A745"
+            cornerRadius={6}
+            onClick={revealResults}
+          >
+            <Text fontSize={12} fill="#FFFFFF" fontWeight="bold">
+              Reveal Results
+            </Text>
+          </AutoLayout>
+        </AutoLayout>
+      )}
       
       <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
         <AutoLayout direction="horizontal" spacing={6}>
