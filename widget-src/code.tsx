@@ -48,13 +48,15 @@ const JOKER_CARDS = [
   { value: '☕', title: 'Coffee Time', emoji: '☕', tooltip: 'Need a break to think' }
 ]
 
-function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick }: {
+function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand }: {
   value: number
   title: string
   emoji: string
   isSelected: boolean
   tooltip: string
   onClick: () => void
+  cardIndex?: number
+  isInHand?: boolean
 }) {
   return (
     <AutoLayout
@@ -63,28 +65,46 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick }: {
       verticalAlignItems="center"
       padding={8}
       spacing={4}
-      width={58}
-      height={78}
+      width={isSelected ? 72 : 58} // Selected card is larger
+      height={isSelected ? 95 : 78}
       fill={isSelected ? "#007AFF" : "#FFFFFF"}
       stroke={isSelected ? "#007AFF" : "#E6E6E6"}
-      strokeWidth={2}
-      cornerRadius={6}
+      strokeWidth={isSelected ? 3 : 2}
+      cornerRadius={8}
       onClick={onClick}
       tooltip={tooltip}
+      hoverStyle={{
+        fill: isSelected ? "#0056CC" : "#F0F8FF",
+        stroke: isSelected ? "#0056CC" : "#007AFF",
+        strokeWidth: 3
+      }}
     >
-      <Text fontSize={14}>{emoji}</Text>
       <Text 
-        fontSize={12} 
+        fontSize={isSelected ? 16 : 14}
+        hoverStyle={{ fontSize: 16 }}
+      >
+        {emoji}
+      </Text>
+      <Text 
+        fontSize={isSelected ? 14 : 12} 
         fontWeight="bold"
         fill={isSelected ? "#FFFFFF" : "#000000"}
+        hoverStyle={{
+          fontSize: 14,
+          fill: isSelected ? "#FFFFFF" : "#007AFF"
+        }}
       >
         {value}
       </Text>
       <Text 
-        fontSize={8} 
+        fontSize={isSelected ? 10 : 8} 
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#666666"}
         width="fill-parent"
+        hoverStyle={{
+          fontSize: 10,
+          fill: isSelected ? "#FFFFFF" : "#333333"
+        }}
       >
         {title}
       </Text>
@@ -92,13 +112,15 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick }: {
   )
 }
 
-function JokerCard({ value, title, emoji, isSelected, tooltip, onClick }: {
+function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand }: {
   value: string
   title: string
   emoji: string
   isSelected: boolean
   tooltip: string
   onClick: () => void
+  cardIndex?: number
+  isInHand?: boolean
 }) {
   return (
     <AutoLayout
@@ -107,28 +129,46 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick }: {
       verticalAlignItems="center"
       padding={8}
       spacing={4}
-      width={58}
-      height={78}
+      width={isSelected ? 72 : 58}
+      height={isSelected ? 95 : 78}
       fill={isSelected ? "#FF6B35" : "#FFFFFF"}
       stroke={isSelected ? "#FF6B35" : "#FF6B35"}
-      strokeWidth={2}
-      cornerRadius={6}
+      strokeWidth={isSelected ? 3 : 2}
+      cornerRadius={8}
       onClick={onClick}
       tooltip={tooltip}
+      hoverStyle={{
+        fill: isSelected ? "#E5501F" : "#FFF4F0",
+        stroke: "#FF6B35",
+        strokeWidth: 3
+      }}
     >
-      <Text fontSize={14}>{emoji}</Text>
       <Text 
-        fontSize={12} 
+        fontSize={isSelected ? 16 : 14}
+        hoverStyle={{ fontSize: 16 }}
+      >
+        {emoji}
+      </Text>
+      <Text 
+        fontSize={isSelected ? 14 : 12} 
         fontWeight="bold"
         fill={isSelected ? "#FFFFFF" : "#FF6B35"}
+        hoverStyle={{
+          fontSize: 14,
+          fill: isSelected ? "#FFFFFF" : "#E5501F"
+        }}
       >
         {value}
       </Text>
       <Text 
-        fontSize={8} 
+        fontSize={isSelected ? 10 : 8} 
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#FF6B35"}
         width="fill-parent"
+        hoverStyle={{
+          fontSize: 10,
+          fill: isSelected ? "#FFFFFF" : "#CC5429"
+        }}
       >
         {title}
       </Text>
@@ -475,7 +515,7 @@ function Widget() {
       fill="#FFFFFF"
       cornerRadius={12}
       stroke="#E6E6E6"
-      width={480}
+      width={560} // Increased width to prevent card cutoff
     >
       <Text fontSize={16} fontWeight="bold">
         Choose your estimate
@@ -523,108 +563,158 @@ function Widget() {
         </AutoLayout>
       )}
       
-      <AutoLayout direction="vertical" spacing={12} horizontalAlignItems="center">
-        {/* Fibonacci Cards */}
-        <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
-          <Text fontSize={12} fill="#666666" fontWeight="bold">Story Points</Text>
-          <AutoLayout direction="horizontal" spacing={6}>
-            {FIBONACCI_CARDS.slice(0, 5).map(card => {
-              // CAREFULLY access current user vote for highlighting
-              let isSelected = false
-              try {
-                const currentUserId = sessionState.facilitatorId
-                const userVote = votes.get(currentUserId)
-                isSelected = userVote?.value === card.value
-              } catch (error) {
-                console.error('Error checking card selection:', error)
-                isSelected = false
-              }
-              
-              return (
-                <EstimationCard
-                  key={card.value}
-                  value={card.value}
-                  title={card.title}
-                  emoji={card.emoji}
-                  tooltip={card.tooltip}
-                  isSelected={isSelected}
-                  onClick={() => {
-                    const currentParticipant = participants.get(sessionState.facilitatorId)
-                    if (currentParticipant && !currentParticipant.isSpectator) {
-                      handleVote(card.value)
-                    }
-                  }}
-                />
-              )
-            })}
-          </AutoLayout>
+      <AutoLayout direction="vertical" spacing={24} horizontalAlignItems="center">
+        {/* Card Hand - Fibonacci Cards */}
+        <AutoLayout direction="vertical" spacing={16} horizontalAlignItems="center">
+          <Text fontSize={14} fill="#666666" fontWeight="bold">📊 Story Points - Choose Your Card</Text>
           
-          <AutoLayout direction="horizontal" spacing={6}>
-            {FIBONACCI_CARDS.slice(5).map(card => {
-              // CAREFULLY access current user vote for highlighting
-              let isSelected = false
+          {/* Card Fan Layout */}
+          <AutoLayout 
+            direction="horizontal" 
+            spacing={4} // Positive spacing to prevent cutoff
+            horizontalAlignItems="end" // Align to bottom for fan effect
+            padding={{ horizontal: 12, vertical: 8 }}
+            height={180} // Further increased height to prevent edge card cutoff
+          >
+            {(() => {
+              // Find the selected card index
+              let selectedIndex = -1
               try {
                 const currentUserId = sessionState.facilitatorId
                 const userVote = votes.get(currentUserId)
-                isSelected = userVote?.value === card.value
+                if (userVote) {
+                  selectedIndex = FIBONACCI_CARDS.findIndex(card => card.value === userVote.value)
+                }
               } catch (error) {
-                console.error('Error checking card selection:', error)
-                isSelected = false
+                console.error('Error finding selected card:', error)
               }
               
-              return (
-                <EstimationCard
-                  key={card.value}
-                  value={card.value}
-                  title={card.title}
-                  emoji={card.emoji}
-                  tooltip={card.tooltip}
-                  isSelected={isSelected}
-                  onClick={() => {
-                    const currentParticipant = participants.get(sessionState.facilitatorId)
-                    if (currentParticipant && !currentParticipant.isSpectator) {
-                      handleVote(card.value)
-                    }
-                  }}
-                />
-              )
-            })}
+              return FIBONACCI_CARDS.map((card, index) => {
+                // CAREFULLY access current user vote for highlighting
+                let isSelected = false
+                try {
+                  const currentUserId = sessionState.facilitatorId
+                  const userVote = votes.get(currentUserId)
+                  isSelected = userVote?.value === card.value
+                } catch (error) {
+                  console.error('Error checking card selection:', error)
+                  isSelected = false
+                }
+                
+                // Calculate height offset based on distance from selected card
+                let heightOffset
+                if (selectedIndex === -1) {
+                  // No selection - all cards at same level
+                  heightOffset = 0
+                } else {
+                  // Selection exists - create gradient from selected card
+                  const distanceFromSelected = Math.abs(index - selectedIndex)
+                  heightOffset = distanceFromSelected * 12 // Steeper gradient
+                }
+                
+                return (
+                  <AutoLayout
+                    key={card.value}
+                    direction="vertical"
+                    // Dynamic height based on distance from selected card
+                    padding={{ top: heightOffset, bottom: 0 }}
+                  >
+                    <EstimationCard
+                      value={card.value}
+                      title={card.title}
+                      emoji={card.emoji}
+                      tooltip={card.tooltip}
+                      isSelected={isSelected}
+                      cardIndex={index}
+                      isInHand={true}
+                      onClick={() => {
+                        const currentParticipant = participants.get(sessionState.facilitatorId)
+                        if (currentParticipant && !currentParticipant.isSpectator) {
+                          handleVote(card.value)
+                        }
+                      }}
+                    />
+                  </AutoLayout>
+                )
+              })
+            })()}
           </AutoLayout>
         </AutoLayout>
 
-        {/* Joker Cards */}
-        <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
-          <Text fontSize={12} fill="#FF6B35" fontWeight="bold">Special Cards</Text>
-          <AutoLayout direction="horizontal" spacing={6}>
-            {JOKER_CARDS.map(card => {
-              // CAREFULLY access current user vote for highlighting
-              let isSelected = false
+        {/* Special Joker Cards */}
+        <AutoLayout direction="vertical" spacing={16} horizontalAlignItems="center">
+          <Text fontSize={14} fill="#FF6B35" fontWeight="bold">🃏 Special Cards - When Story Points Don't Apply</Text>
+          
+          {/* Joker Card Fan */}
+          <AutoLayout 
+            direction="horizontal" 
+            spacing={8} // Normal spacing
+            horizontalAlignItems="end" // Align to bottom
+            padding={{ horizontal: 12, vertical: 8 }}
+            height={140} // Increased height to accommodate full joker card stacking
+          >
+            {(() => {
+              // Find the selected joker card index
+              let selectedJokerIndex = -1
               try {
                 const currentUserId = sessionState.facilitatorId
                 const userVote = votes.get(currentUserId)
-                isSelected = userVote?.value === card.value
+                if (userVote) {
+                  selectedJokerIndex = JOKER_CARDS.findIndex(card => card.value === userVote.value)
+                }
               } catch (error) {
-                console.error('Error checking card selection:', error)
-                isSelected = false
+                console.error('Error finding selected joker card:', error)
               }
               
-              return (
-                <JokerCard
-                  key={card.value}
-                  value={card.value}
-                  title={card.title}
-                  emoji={card.emoji}
-                  tooltip={card.tooltip}
-                  isSelected={isSelected}
-                  onClick={() => {
-                    const currentParticipant = participants.get(sessionState.facilitatorId)
-                    if (currentParticipant && !currentParticipant.isSpectator) {
-                      handleVote(card.value)
-                    }
-                  }}
-                />
-              )
-            })}
+              return JOKER_CARDS.map((card, index) => {
+                // CAREFULLY access current user vote for highlighting
+                let isSelected = false
+                try {
+                  const currentUserId = sessionState.facilitatorId
+                  const userVote = votes.get(currentUserId)
+                  isSelected = userVote?.value === card.value
+                } catch (error) {
+                  console.error('Error checking card selection:', error)
+                  isSelected = false
+                }
+                
+                // Calculate height offset based on distance from selected joker card
+                let heightOffset
+                if (selectedJokerIndex === -1) {
+                  // No joker selection - all cards at same level
+                  heightOffset = 0
+                } else {
+                  // Joker selection exists - create gradient from selected card
+                  const distanceFromSelected = Math.abs(index - selectedJokerIndex)
+                  heightOffset = distanceFromSelected * 10 // Gradient for joker cards
+                }
+                
+                return (
+                  <AutoLayout
+                    key={card.value}
+                    direction="vertical"
+                    // Dynamic height based on distance from selected joker card
+                    padding={{ top: heightOffset, bottom: 0 }}
+                  >
+                    <JokerCard
+                      value={card.value}
+                      title={card.title}
+                      emoji={card.emoji}
+                      tooltip={card.tooltip}
+                      isSelected={isSelected}
+                      cardIndex={index}
+                      isInHand={true}
+                      onClick={() => {
+                        const currentParticipant = participants.get(sessionState.facilitatorId)
+                        if (currentParticipant && !currentParticipant.isSpectator) {
+                          handleVote(card.value)
+                        }
+                      }}
+                    />
+                  </AutoLayout>
+                )
+              })
+            })()}
           </AutoLayout>
         </AutoLayout>
       </AutoLayout>
