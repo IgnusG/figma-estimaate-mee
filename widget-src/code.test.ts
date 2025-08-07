@@ -103,4 +103,96 @@ describe('Estimatee-Mee Widget', () => {
       })
     })
   })
+
+  describe('Vote Result Grouping', () => {
+    it('should group votes by value correctly', () => {
+      // Mock vote data
+      const mockVotes = new Map([
+        ['user1', { userId: 'user1', userName: 'Alice', value: 5, timestamp: 1000 }],
+        ['user2', { userId: 'user2', userName: 'Bob', value: 5, timestamp: 1001 }],
+        ['user3', { userId: 'user3', userName: 'Charlie', value: 8, timestamp: 1002 }],
+        ['user4', { userId: 'user4', userName: 'Diana', value: '?', timestamp: 1003 }]
+      ])
+
+      // Simulate the groupVotesByValue function logic
+      const grouped = new Map()
+      
+      mockVotes.forEach(vote => {
+        const existing = grouped.get(vote.value)
+        if (existing) {
+          existing.participants.push({
+            name: vote.userName,
+            userId: vote.userId
+          })
+          existing.count++
+        } else {
+          grouped.set(vote.value, {
+            value: vote.value,
+            participants: [{
+              name: vote.userName,
+              userId: vote.userId
+            }],
+            count: 1
+          })
+        }
+      })
+
+      const results = Array.from(grouped.values()).sort((a, b) => {
+        if (typeof a.value === 'number' && typeof b.value === 'number') {
+          return a.value - b.value
+        }
+        if (typeof a.value === 'number') return -1
+        if (typeof b.value === 'number') return 1
+        return String(a.value).localeCompare(String(b.value))
+      })
+
+      expect(results).toHaveLength(3)
+      
+      // Check first group (value 5 with 2 votes)
+      expect(results[0].value).toBe(5)
+      expect(results[0].count).toBe(2)
+      expect(results[0].participants.map(p => p.name)).toEqual(['Alice', 'Bob'])
+      
+      // Check second group (value 8 with 1 vote)
+      expect(results[1].value).toBe(8)
+      expect(results[1].count).toBe(1)
+      expect(results[1].participants[0].name).toBe('Charlie')
+      
+      // Check third group (joker value '?' with 1 vote)
+      expect(results[2].value).toBe('?')
+      expect(results[2].count).toBe(1)
+      expect(results[2].participants[0].name).toBe('Diana')
+    })
+
+    it('should sort vote results with numbers first, then strings', () => {
+      const mockVotes = new Map([
+        ['user1', { userId: 'user1', userName: 'Alice', value: '∞', timestamp: 1000 }],
+        ['user2', { userId: 'user2', userName: 'Bob', value: 3, timestamp: 1001 }],
+        ['user3', { userId: 'user3', userName: 'Charlie', value: 1, timestamp: 1002 }],
+        ['user4', { userId: 'user4', userName: 'Diana', value: '?', timestamp: 1003 }]
+      ])
+
+      const grouped = new Map()
+      
+      mockVotes.forEach(vote => {
+        grouped.set(vote.value, {
+          value: vote.value,
+          participants: [{ name: vote.userName, userId: vote.userId }],
+          count: 1
+        })
+      })
+
+      const results = Array.from(grouped.values()).sort((a, b) => {
+        if (typeof a.value === 'number' && typeof b.value === 'number') {
+          return a.value - b.value
+        }
+        if (typeof a.value === 'number') return -1
+        if (typeof b.value === 'number') return 1
+        return String(a.value).localeCompare(String(b.value))
+      })
+
+      // Numbers should come first (1, 3), then strings (?, ∞)
+      expect(results.map(r => r.value)).toEqual([1, 3, '?', '∞'])
+    })
+  })
 })

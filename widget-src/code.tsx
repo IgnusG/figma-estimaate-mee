@@ -1,5 +1,5 @@
 const { widget } = figma
-const { useSyncedState, useSyncedMap, AutoLayout, Text } = widget
+const { useSyncedState, useSyncedMap, useEffect, AutoLayout, Text } = widget
 
 interface Vote {
   userId: string
@@ -48,15 +48,15 @@ const JOKER_CARDS = [
   { value: '☕', title: 'Coffee Time', emoji: '☕', tooltip: 'Need a break to think' }
 ]
 
-function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand, cardScale }: {
+function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, _cardIndex, _isInHand, cardScale }: {
   value: number
   title: string
   emoji: string
   isSelected: boolean
   tooltip: string
   onClick: () => void
-  cardIndex?: number
-  isInHand?: boolean
+  _cardIndex?: number
+  _isInHand?: boolean
   cardScale?: number
 }) {
   // Use cardScale to determine size, default to 1.0 (full size)
@@ -90,13 +90,11 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
       tooltip={tooltip}
       hoverStyle={{
         fill: isSelected ? "#0056CC" : "#F0F8FF",
-        stroke: isSelected ? "#0056CC" : "#007AFF",
-        strokeWidth: 3
+        stroke: isSelected ? "#0056CC" : "#007AFF"
       }}
     >
       <Text 
         fontSize={scaledEmojiFontSize}
-        hoverStyle={{ fontSize: Math.round(scaledEmojiFontSize * 1.1) }}
       >
         {emoji}
       </Text>
@@ -104,10 +102,6 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
         fontSize={scaledFontSize} 
         fontWeight="bold"
         fill={isSelected ? "#FFFFFF" : "#000000"}
-        hoverStyle={{
-          fontSize: Math.round(scaledFontSize * 1.1),
-          fill: isSelected ? "#FFFFFF" : "#007AFF"
-        }}
       >
         {value}
       </Text>
@@ -116,10 +110,6 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#666666"}
         width="fill-parent"
-        hoverStyle={{
-          fontSize: Math.round(scaledTitleFontSize * 1.1),
-          fill: isSelected ? "#FFFFFF" : "#333333"
-        }}
       >
         {title}
       </Text>
@@ -127,15 +117,15 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
   )
 }
 
-function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand, cardScale }: {
+function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, _cardIndex, _isInHand, cardScale }: {
   value: string
   title: string
   emoji: string
   isSelected: boolean
   tooltip: string
   onClick: () => void
-  cardIndex?: number
-  isInHand?: boolean
+  _cardIndex?: number
+  _isInHand?: boolean
   cardScale?: number
 }) {
   // Use cardScale to determine size, default to 1.0 (full size)
@@ -169,13 +159,11 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardInde
       tooltip={tooltip}
       hoverStyle={{
         fill: isSelected ? "#E5501F" : "#FFF4F0",
-        stroke: "#FF6B35",
-        strokeWidth: 3
+        stroke: "#FF6B35"
       }}
     >
       <Text 
         fontSize={scaledEmojiFontSize}
-        hoverStyle={{ fontSize: Math.round(scaledEmojiFontSize * 1.1) }}
       >
         {emoji}
       </Text>
@@ -183,10 +171,6 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardInde
         fontSize={scaledFontSize} 
         fontWeight="bold"
         fill={isSelected ? "#FFFFFF" : "#FF6B35"}
-        hoverStyle={{
-          fontSize: Math.round(scaledFontSize * 1.1),
-          fill: isSelected ? "#FFFFFF" : "#E5501F"
-        }}
       >
         {value}
       </Text>
@@ -195,10 +179,6 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardInde
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#FF6B35"}
         width="fill-parent"
-        hoverStyle={{
-          fontSize: Math.round(scaledTitleFontSize * 1.1),
-          fill: isSelected ? "#FFFFFF" : "#CC5429"
-        }}
       >
         {title}
       </Text>
@@ -284,8 +264,61 @@ function Widget() {
     facilitatorId: '',
     participants: []
   })
+  const [myUserId, setMyUserId] = useSyncedState<string>('myUserId', '')
   const votes = useSyncedMap<Vote>('votes')
   const participants = useSyncedMap<Participant>('participants')
+
+  // Initialize current user ID when widget loads
+  useEffect(() => {
+    try {
+      const userId = figma.currentUser?.id
+      const userName = figma.currentUser?.name || 'Anonymous'
+      
+      if (userId && userId !== myUserId) {
+        console.log('Setting current user ID:', { userId, userName })
+        setMyUserId(userId)
+      }
+      
+      // Auto-add all active users to participants when session is voting
+      if (sessionState.status === 'voting') {
+        try {
+          const activeUsers = figma.activeUsers || []
+          console.log('Active users in file:', activeUsers.length, activeUsers.map(u => ({ id: u.id, name: u.name })))
+          
+          // Add any active users who aren't already participants
+          activeUsers.forEach(user => {
+            if (user.id && !participants.get(user.id)) {
+              console.log('Auto-adding active user:', { userId: user.id, userName: user.name })
+              participants.set(user.id, {
+                userId: user.id,
+                userName: user.name || 'Anonymous',
+                isSpectator: false,
+                joinedAt: Date.now()
+              })
+              
+              // Update session participant list
+              const currentParticipants = sessionState.participants || []
+              if (!currentParticipants.includes(user.id)) {
+                setSessionState({
+                  ...sessionState,
+                  participants: [...currentParticipants, user.id]
+                })
+              }
+            }
+          })
+        } catch (activeUsersError) {
+          console.error('Error accessing activeUsers:', activeUsersError)
+          // Fallback to manual join for current user
+          if (userId && !participants.get(userId)) {
+            console.log('Fallback: Auto-joining current user to active session')
+            joinSession(false)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error initializing user:', error)
+    }
+  })
 
   const handleStart = () => {
     try {
@@ -379,8 +412,8 @@ function Widget() {
   const revealResults = () => {
     try {
       // Only facilitator can reveal results
-      const currentUserId = figma.currentUser?.id || sessionState.facilitatorId
-      if (currentUserId === sessionState.facilitatorId) {
+      const userId = figma.currentUser?.id || sessionState.facilitatorId
+      if (userId === sessionState.facilitatorId) {
         console.log('Revealing results')
         setSessionState({
           ...sessionState,
@@ -395,8 +428,8 @@ function Widget() {
   const resetSession = () => {
     try {
       // Only facilitator can reset
-      const currentUserId = figma.currentUser?.id || sessionState.facilitatorId
-      if (currentUserId === sessionState.facilitatorId) {
+      const userId = figma.currentUser?.id || sessionState.facilitatorId
+      if (userId === sessionState.facilitatorId) {
         console.log('Resetting session')
         // Clear all votes
         votes.keys().forEach(key => votes.delete(key))
@@ -489,8 +522,8 @@ function Widget() {
   }
 
   // Check if current user needs to join
-  const currentUserId = sessionState.facilitatorId // Use facilitator for now
-  const currentParticipant = participants.get(currentUserId)
+  const currentUserId = myUserId
+  const currentParticipant = currentUserId ? participants.get(currentUserId) : null
   
   if (sessionState.status === 'voting' && !currentParticipant) {
     return (
@@ -553,32 +586,90 @@ function Widget() {
       {/* Participant Status */}
       <AutoLayout direction="vertical" spacing={6} horizontalAlignItems="center">
         <Text fontSize={12} fill="#666666">
-          Votes: {votes.size}/{sessionState.participants.filter(id => !participants.get(id)?.isSpectator).length}
+          Votes: {votes.size}/{(() => {
+            try {
+              // Use activeUsers if available, fallback to participants
+              const activeUsers = figma.activeUsers || []
+              return activeUsers.length > 0 ? activeUsers.length : sessionState.participants.filter(id => !participants.get(id)?.isSpectator).length
+            } catch (error) {
+              return sessionState.participants.filter(id => !participants.get(id)?.isSpectator).length
+            }
+          })()}
         </Text>
         <AutoLayout direction="horizontal" spacing={8} wrap horizontalAlignItems="center">
-          {sessionState.participants.map(userId => {
-            const participant = participants.get(userId)
-            const hasVoted = votes.get(userId) !== undefined
-            if (!participant) return null
-            
-            return (
-              <AutoLayout
-                key={userId}
-                padding={{ vertical: 2, horizontal: 6 }}
-                fill={hasVoted ? "#28A745" : participant.isSpectator ? "#6C757D" : "#FFC107"}
-                cornerRadius={12}
-              >
-                <Text fontSize={10} fill="#FFFFFF">
-                  {participant.userName}{participant.isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
-                </Text>
-              </AutoLayout>
-            )
-          })}
+          {(() => {
+            try {
+              // Show active users if available, fallback to participants
+              const activeUsers = figma.activeUsers || []
+              if (activeUsers.length > 0) {
+                return activeUsers.map(user => {
+                  if (!user.id) return null
+                  const hasVoted = votes.get(user.id) !== undefined
+                  const participant = participants.get(user.id)
+                  const isSpectator = participant?.isSpectator || false
+                  
+                  return (
+                    <AutoLayout
+                      key={user.id}
+                      padding={{ vertical: 2, horizontal: 6 }}
+                      fill={hasVoted ? "#28A745" : isSpectator ? "#6C757D" : "#FFC107"}
+                      cornerRadius={12}
+                    >
+                      <Text fontSize={10} fill="#FFFFFF">
+                        {user.name || 'Anonymous'}{isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
+                      </Text>
+                    </AutoLayout>
+                  )
+                })
+              } else {
+                // Fallback to session participants
+                return sessionState.participants.map(userId => {
+                  const participant = participants.get(userId)
+                  const hasVoted = votes.get(userId) !== undefined
+                  if (!participant) return null
+                  
+                  return (
+                    <AutoLayout
+                      key={userId}
+                      padding={{ vertical: 2, horizontal: 6 }}
+                      fill={hasVoted ? "#28A745" : participant.isSpectator ? "#6C757D" : "#FFC107"}
+                      cornerRadius={12}
+                    >
+                      <Text fontSize={10} fill="#FFFFFF">
+                        {participant.userName}{participant.isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
+                      </Text>
+                    </AutoLayout>
+                  )
+                })
+              }
+            } catch (error) {
+              console.error('Error displaying participants:', error)
+              // Final fallback to session participants
+              return sessionState.participants.map(userId => {
+                const participant = participants.get(userId)
+                const hasVoted = votes.get(userId) !== undefined
+                if (!participant) return null
+                
+                return (
+                  <AutoLayout
+                    key={userId}
+                    padding={{ vertical: 2, horizontal: 6 }}
+                    fill={hasVoted ? "#28A745" : participant.isSpectator ? "#6C757D" : "#FFC107"}
+                    cornerRadius={12}
+                  >
+                    <Text fontSize={10} fill="#FFFFFF">
+                      {participant.userName}{participant.isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
+                    </Text>
+                  </AutoLayout>
+                )
+              })
+            }
+          })()}
         </AutoLayout>
       </AutoLayout>
       
       {/* Facilitator Controls */}
-      {sessionState.facilitatorId === sessionState.facilitatorId && (
+      {myUserId === sessionState.facilitatorId && (
         <AutoLayout direction="horizontal" spacing={8}>
           <AutoLayout
             padding={{ vertical: 8, horizontal: 16 }}
@@ -610,10 +701,11 @@ function Widget() {
               // Find the selected card index
               let selectedIndex = -1
               try {
-                const currentUserId = sessionState.facilitatorId
-                const userVote = votes.get(currentUserId)
-                if (userVote) {
-                  selectedIndex = FIBONACCI_CARDS.findIndex(card => card.value === userVote.value)
+                if (currentUserId) {
+                  const userVote = votes.get(currentUserId)
+                  if (userVote) {
+                    selectedIndex = FIBONACCI_CARDS.findIndex(card => card.value === userVote.value)
+                  }
                 }
               } catch (error) {
                 console.error('Error finding selected card:', error)
@@ -623,9 +715,10 @@ function Widget() {
                 // CAREFULLY access current user vote for highlighting
                 let isSelected = false
                 try {
-                  const currentUserId = sessionState.facilitatorId
-                  const userVote = votes.get(currentUserId)
-                  isSelected = userVote?.value === card.value
+                  if (currentUserId) {
+                    const userVote = votes.get(currentUserId)
+                    isSelected = userVote?.value === card.value
+                  }
                 } catch (error) {
                   console.error('Error checking card selection:', error)
                   isSelected = false
@@ -651,11 +744,11 @@ function Widget() {
                     emoji={card.emoji}
                     tooltip={card.tooltip}
                     isSelected={isSelected}
-                    cardIndex={index}
-                    isInHand={true}
+                    _cardIndex={index}
+                    _isInHand={true}
                     cardScale={cardScale}
                     onClick={() => {
-                      const currentParticipant = participants.get(sessionState.facilitatorId)
+                      // Use currentParticipant from scope
                       if (currentParticipant && !currentParticipant.isSpectator) {
                         handleVote(card.value)
                       }
@@ -683,10 +776,11 @@ function Widget() {
               // Find the selected joker card index
               let selectedJokerIndex = -1
               try {
-                const currentUserId = sessionState.facilitatorId
-                const userVote = votes.get(currentUserId)
-                if (userVote) {
-                  selectedJokerIndex = JOKER_CARDS.findIndex(card => card.value === userVote.value)
+                if (currentUserId) {
+                  const userVote = votes.get(currentUserId)
+                  if (userVote) {
+                    selectedJokerIndex = JOKER_CARDS.findIndex(card => card.value === userVote.value)
+                  }
                 }
               } catch (error) {
                 console.error('Error finding selected joker card:', error)
@@ -696,9 +790,10 @@ function Widget() {
                 // CAREFULLY access current user vote for highlighting
                 let isSelected = false
                 try {
-                  const currentUserId = sessionState.facilitatorId
-                  const userVote = votes.get(currentUserId)
-                  isSelected = userVote?.value === card.value
+                  if (currentUserId) {
+                    const userVote = votes.get(currentUserId)
+                    isSelected = userVote?.value === card.value
+                  }
                 } catch (error) {
                   console.error('Error checking card selection:', error)
                   isSelected = false
@@ -724,11 +819,11 @@ function Widget() {
                     emoji={card.emoji}
                     tooltip={card.tooltip}
                     isSelected={isSelected}
-                    cardIndex={index}
-                    isInHand={true}
+                    _cardIndex={index}
+                    _isInHand={true}
                     cardScale={cardScale}
                     onClick={() => {
-                      const currentParticipant = participants.get(sessionState.facilitatorId)
+                      // Use currentParticipant from scope
                       if (currentParticipant && !currentParticipant.isSpectator) {
                         handleVote(card.value)
                       }

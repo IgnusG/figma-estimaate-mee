@@ -12,7 +12,8 @@
   "containsWidget": true,
   "widgetApi": "1.0.0",
   "permissions": [
-    "currentuser"
+    "currentuser",
+    "activeusers"
   ],
   "networkAccess": {
     "allowedDomains": [
