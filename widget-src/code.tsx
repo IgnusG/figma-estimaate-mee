@@ -48,7 +48,7 @@ const JOKER_CARDS = [
   { value: '☕', title: 'Coffee Time', emoji: '☕', tooltip: 'Need a break to think' }
 ]
 
-function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand }: {
+function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand, cardScale }: {
   value: number
   title: string
   emoji: string
@@ -57,20 +57,35 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
   onClick: () => void
   cardIndex?: number
   isInHand?: boolean
+  cardScale?: number
 }) {
+  // Use cardScale to determine size, default to 1.0 (full size)
+  const scale = cardScale || 1.0
+  const baseWidth = 58
+  const baseHeight = 78
+  const baseFontSize = 12
+  const baseEmojiFontSize = 14
+  const baseTitleFontSize = 8
+  
+  const scaledWidth = Math.round(baseWidth * scale)
+  const scaledHeight = Math.round(baseHeight * scale)
+  const scaledFontSize = Math.round(baseFontSize * scale)
+  const scaledEmojiFontSize = Math.round(baseEmojiFontSize * scale)
+  const scaledTitleFontSize = Math.round(baseTitleFontSize * scale)
+  
   return (
     <AutoLayout
       direction="vertical"
       horizontalAlignItems="center"
       verticalAlignItems="center"
-      padding={8}
-      spacing={4}
-      width={isSelected ? 72 : 58} // Selected card is larger
-      height={isSelected ? 95 : 78}
+      padding={Math.round(8 * scale)}
+      spacing={Math.round(4 * scale)}
+      width={scaledWidth}
+      height={scaledHeight}
       fill={isSelected ? "#007AFF" : "#FFFFFF"}
       stroke={isSelected ? "#007AFF" : "#E6E6E6"}
       strokeWidth={isSelected ? 3 : 2}
-      cornerRadius={8}
+      cornerRadius={Math.round(8 * scale)}
       onClick={onClick}
       tooltip={tooltip}
       hoverStyle={{
@@ -80,29 +95,29 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
       }}
     >
       <Text 
-        fontSize={isSelected ? 16 : 14}
-        hoverStyle={{ fontSize: 16 }}
+        fontSize={scaledEmojiFontSize}
+        hoverStyle={{ fontSize: Math.round(scaledEmojiFontSize * 1.1) }}
       >
         {emoji}
       </Text>
       <Text 
-        fontSize={isSelected ? 14 : 12} 
+        fontSize={scaledFontSize} 
         fontWeight="bold"
         fill={isSelected ? "#FFFFFF" : "#000000"}
         hoverStyle={{
-          fontSize: 14,
+          fontSize: Math.round(scaledFontSize * 1.1),
           fill: isSelected ? "#FFFFFF" : "#007AFF"
         }}
       >
         {value}
       </Text>
       <Text 
-        fontSize={isSelected ? 10 : 8} 
+        fontSize={scaledTitleFontSize} 
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#666666"}
         width="fill-parent"
         hoverStyle={{
-          fontSize: 10,
+          fontSize: Math.round(scaledTitleFontSize * 1.1),
           fill: isSelected ? "#FFFFFF" : "#333333"
         }}
       >
@@ -112,7 +127,7 @@ function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, car
   )
 }
 
-function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand }: {
+function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardIndex, isInHand, cardScale }: {
   value: string
   title: string
   emoji: string
@@ -121,20 +136,35 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardInde
   onClick: () => void
   cardIndex?: number
   isInHand?: boolean
+  cardScale?: number
 }) {
+  // Use cardScale to determine size, default to 1.0 (full size)
+  const scale = cardScale || 1.0
+  const baseWidth = 58
+  const baseHeight = 78
+  const baseFontSize = 12
+  const baseEmojiFontSize = 14
+  const baseTitleFontSize = 8
+  
+  const scaledWidth = Math.round(baseWidth * scale)
+  const scaledHeight = Math.round(baseHeight * scale)
+  const scaledFontSize = Math.round(baseFontSize * scale)
+  const scaledEmojiFontSize = Math.round(baseEmojiFontSize * scale)
+  const scaledTitleFontSize = Math.round(baseTitleFontSize * scale)
+  
   return (
     <AutoLayout
       direction="vertical"
       horizontalAlignItems="center"
       verticalAlignItems="center"
-      padding={8}
-      spacing={4}
-      width={isSelected ? 72 : 58}
-      height={isSelected ? 95 : 78}
+      padding={Math.round(8 * scale)}
+      spacing={Math.round(4 * scale)}
+      width={scaledWidth}
+      height={scaledHeight}
       fill={isSelected ? "#FF6B35" : "#FFFFFF"}
       stroke={isSelected ? "#FF6B35" : "#FF6B35"}
       strokeWidth={isSelected ? 3 : 2}
-      cornerRadius={8}
+      cornerRadius={Math.round(8 * scale)}
       onClick={onClick}
       tooltip={tooltip}
       hoverStyle={{
@@ -144,29 +174,29 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, cardInde
       }}
     >
       <Text 
-        fontSize={isSelected ? 16 : 14}
-        hoverStyle={{ fontSize: 16 }}
+        fontSize={scaledEmojiFontSize}
+        hoverStyle={{ fontSize: Math.round(scaledEmojiFontSize * 1.1) }}
       >
         {emoji}
       </Text>
       <Text 
-        fontSize={isSelected ? 14 : 12} 
+        fontSize={scaledFontSize} 
         fontWeight="bold"
         fill={isSelected ? "#FFFFFF" : "#FF6B35"}
         hoverStyle={{
-          fontSize: 14,
+          fontSize: Math.round(scaledFontSize * 1.1),
           fill: isSelected ? "#FFFFFF" : "#E5501F"
         }}
       >
         {value}
       </Text>
       <Text 
-        fontSize={isSelected ? 10 : 8} 
+        fontSize={scaledTitleFontSize} 
         horizontalAlignText="center"
         fill={isSelected ? "#FFFFFF" : "#FF6B35"}
         width="fill-parent"
         hoverStyle={{
-          fontSize: 10,
+          fontSize: Math.round(scaledTitleFontSize * 1.1),
           fill: isSelected ? "#FFFFFF" : "#CC5429"
         }}
       >
@@ -572,9 +602,9 @@ function Widget() {
           <AutoLayout 
             direction="horizontal" 
             spacing={4} // Positive spacing to prevent cutoff
-            horizontalAlignItems="end" // Align to bottom for fan effect
-            padding={{ horizontal: 12, vertical: 8 }}
-            height={180} // Further increased height to prevent edge card cutoff
+            horizontalAlignItems="center" // Center alignment since no height offsets
+            padding={{ horizontal: 12, vertical: 12 }}
+            height={120} // Reduced height since cards scale instead of move
           >
             {(() => {
               // Find the selected card index
@@ -601,40 +631,36 @@ function Widget() {
                   isSelected = false
                 }
                 
-                // Calculate height offset based on distance from selected card
-                let heightOffset
+                // Calculate card scale based on distance from selected card
+                let cardScale
                 if (selectedIndex === -1) {
-                  // No selection - all cards at same level
-                  heightOffset = 0
+                  // No selection - all cards same size
+                  cardScale = 1.0
                 } else {
-                  // Selection exists - create gradient from selected card
+                  // Selection exists - scale down based on distance from selected card
                   const distanceFromSelected = Math.abs(index - selectedIndex)
-                  heightOffset = distanceFromSelected * 12 // Steeper gradient
+                  // Selected card = 1.2 scale, others decrease by 0.1 per step
+                  cardScale = isSelected ? 1.2 : Math.max(0.7, 1.0 - (distanceFromSelected * 0.1))
                 }
                 
                 return (
-                  <AutoLayout
+                  <EstimationCard
                     key={card.value}
-                    direction="vertical"
-                    // Dynamic height based on distance from selected card
-                    padding={{ top: heightOffset, bottom: 0 }}
-                  >
-                    <EstimationCard
-                      value={card.value}
-                      title={card.title}
-                      emoji={card.emoji}
-                      tooltip={card.tooltip}
-                      isSelected={isSelected}
-                      cardIndex={index}
-                      isInHand={true}
-                      onClick={() => {
-                        const currentParticipant = participants.get(sessionState.facilitatorId)
-                        if (currentParticipant && !currentParticipant.isSpectator) {
-                          handleVote(card.value)
-                        }
-                      }}
-                    />
-                  </AutoLayout>
+                    value={card.value}
+                    title={card.title}
+                    emoji={card.emoji}
+                    tooltip={card.tooltip}
+                    isSelected={isSelected}
+                    cardIndex={index}
+                    isInHand={true}
+                    cardScale={cardScale}
+                    onClick={() => {
+                      const currentParticipant = participants.get(sessionState.facilitatorId)
+                      if (currentParticipant && !currentParticipant.isSpectator) {
+                        handleVote(card.value)
+                      }
+                    }}
+                  />
                 )
               })
             })()}
@@ -649,9 +675,9 @@ function Widget() {
           <AutoLayout 
             direction="horizontal" 
             spacing={8} // Normal spacing
-            horizontalAlignItems="end" // Align to bottom
-            padding={{ horizontal: 12, vertical: 8 }}
-            height={140} // Increased height to accommodate full joker card stacking
+            horizontalAlignItems="center" // Center alignment since no height offsets
+            padding={{ horizontal: 12, vertical: 12 }}
+            height={110} // Reduced height since cards scale instead of move
           >
             {(() => {
               // Find the selected joker card index
@@ -678,40 +704,36 @@ function Widget() {
                   isSelected = false
                 }
                 
-                // Calculate height offset based on distance from selected joker card
-                let heightOffset
+                // Calculate card scale based on distance from selected joker card
+                let cardScale
                 if (selectedJokerIndex === -1) {
-                  // No joker selection - all cards at same level
-                  heightOffset = 0
+                  // No joker selection - all cards same size
+                  cardScale = 1.0
                 } else {
-                  // Joker selection exists - create gradient from selected card
+                  // Joker selection exists - scale down based on distance from selected card
                   const distanceFromSelected = Math.abs(index - selectedJokerIndex)
-                  heightOffset = distanceFromSelected * 10 // Gradient for joker cards
+                  // Selected card = 1.2 scale, others decrease by 0.1 per step
+                  cardScale = isSelected ? 1.2 : Math.max(0.7, 1.0 - (distanceFromSelected * 0.1))
                 }
                 
                 return (
-                  <AutoLayout
+                  <JokerCard
                     key={card.value}
-                    direction="vertical"
-                    // Dynamic height based on distance from selected joker card
-                    padding={{ top: heightOffset, bottom: 0 }}
-                  >
-                    <JokerCard
-                      value={card.value}
-                      title={card.title}
-                      emoji={card.emoji}
-                      tooltip={card.tooltip}
-                      isSelected={isSelected}
-                      cardIndex={index}
-                      isInHand={true}
-                      onClick={() => {
-                        const currentParticipant = participants.get(sessionState.facilitatorId)
-                        if (currentParticipant && !currentParticipant.isSpectator) {
-                          handleVote(card.value)
-                        }
-                      }}
-                    />
-                  </AutoLayout>
+                    value={card.value}
+                    title={card.title}
+                    emoji={card.emoji}
+                    tooltip={card.tooltip}
+                    isSelected={isSelected}
+                    cardIndex={index}
+                    isInHand={true}
+                    cardScale={cardScale}
+                    onClick={() => {
+                      const currentParticipant = participants.get(sessionState.facilitatorId)
+                      if (currentParticipant && !currentParticipant.isSpectator) {
+                        handleVote(card.value)
+                      }
+                    }}
+                  />
                 )
               })
             })()}
