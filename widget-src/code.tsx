@@ -1,5 +1,5 @@
 const { widget } = figma
-const { useSyncedState, useSyncedMap, useEffect, AutoLayout, Text } = widget
+const { useSyncedState, useSyncedMap, useEffect, waitForTask, AutoLayout, Text } = widget
 
 interface Vote {
   userId: string
@@ -12,6 +12,7 @@ interface SessionState {
   status: 'waiting' | 'voting' | 'revealed'
   facilitatorId: string
   participants: string[]
+  participantsSnapshot?: Participant[]  // Snapshot of participants when results revealed
 }
 
 interface Participant {
@@ -47,6 +48,10 @@ const JOKER_CARDS = [
   { value: '🍕', title: 'Pizza Break', emoji: '🍕', tooltip: 'Let\'s discuss over food' },
   { value: '☕', title: 'Coffee Time', emoji: '☕', tooltip: 'Need a break to think' }
 ]
+
+// Global polling state
+let globalPollingCount = 0
+let currentTimeout: ReturnType<typeof setTimeout> | null = null
 
 function EstimationCard({ value, title, emoji, isSelected, tooltip, onClick, _cardIndex, _isInHand, cardScale }: {
   value: number
@@ -188,11 +193,19 @@ function JokerCard({ value, title, emoji, isSelected, tooltip, onClick, _cardInd
 
 function ResultsView({ 
   voteResults, 
-  onReset 
+  onReset,
+  participantsSnapshot,
+  votes
 }: { 
   voteResults: VoteResult[]
   onReset: () => void
+  participantsSnapshot?: Participant[]
+  votes: ReturnType<typeof useSyncedMap<Vote>>
 }) {
+  // Get non-voters from the snapshot
+  const nonVoters = participantsSnapshot?.filter(participant => 
+    !participant.isSpectator && !votes.get(participant.userId)
+  ) || []
   return (
     <AutoLayout
       direction="vertical"
@@ -239,6 +252,34 @@ function ResultsView({
             </AutoLayout>
           </AutoLayout>
         ))}
+        
+        {/* Non-voters section */}
+        {nonVoters.length > 0 && (
+          <AutoLayout
+            direction="vertical"
+            spacing={6}
+            padding={12}
+            fill="#FFF3CD"
+            cornerRadius={6}
+            width="fill-parent"
+          >
+            <AutoLayout direction="horizontal" spacing={8} horizontalAlignItems="center">
+              <Text fontSize={16} fontWeight="bold" fill="#856404">
+                No Vote
+              </Text>
+              <Text fontSize={12} fill="#856404">
+                ({nonVoters.length} participant{nonVoters.length !== 1 ? 's' : ''})
+              </Text>
+            </AutoLayout>
+            <AutoLayout direction="vertical" spacing={2}>
+              {nonVoters.map(participant => (
+                <Text key={participant.userId} fontSize={12} fill="#856404">
+                  • {participant.userName}
+                </Text>
+              ))}
+            </AutoLayout>
+          </AutoLayout>
+        )}
       </AutoLayout>
       
       {/* Reset Button for Facilitator */}
@@ -265,10 +306,12 @@ function Widget() {
     participants: []
   })
   const [myUserId, setMyUserId] = useSyncedState<string>('myUserId', '')
+  const [activeUserIds, setActiveUserIds] = useSyncedState<string[]>('activeUserIds', [])
+  const [pollingTrigger, setPollingTrigger] = useSyncedState<number>('pollingTrigger', 0)
   const votes = useSyncedMap<Vote>('votes')
   const participants = useSyncedMap<Participant>('participants')
 
-  // Initialize current user ID when widget loads
+  // Initialize current user ID
   useEffect(() => {
     try {
       const userId = figma.currentUser?.id
@@ -278,45 +321,100 @@ function Widget() {
         console.log('Setting current user ID:', { userId, userName })
         setMyUserId(userId)
       }
-      
-      // Auto-add all active users to participants when session is voting
-      if (sessionState.status === 'voting') {
-        try {
-          const activeUsers = figma.activeUsers || []
-          console.log('Active users in file:', activeUsers.length, activeUsers.map(u => ({ id: u.id, name: u.name })))
-          
-          // Add any active users who aren't already participants
-          activeUsers.forEach(user => {
-            if (user.id && !participants.get(user.id)) {
-              console.log('Auto-adding active user:', { userId: user.id, userName: user.name })
-              participants.set(user.id, {
-                userId: user.id,
-                userName: user.name || 'Anonymous',
-                isSpectator: false,
-                joinedAt: Date.now()
-              })
-              
-              // Update session participant list
-              const currentParticipants = sessionState.participants || []
-              if (!currentParticipants.includes(user.id)) {
-                setSessionState({
-                  ...sessionState,
-                  participants: [...currentParticipants, user.id]
-                })
-              }
-            }
-          })
-        } catch (activeUsersError) {
-          console.error('Error accessing activeUsers:', activeUsersError)
-          // Fallback to manual join for current user
-          if (userId && !participants.get(userId)) {
-            console.log('Fallback: Auto-joining current user to active session')
-            joinSession(false)
-          }
-        }
-      }
     } catch (error) {
       console.error('Error initializing user:', error)
+    }
+  })
+
+  // waitForTask + timeout + re-render cycle polling
+  useEffect(() => {
+    if (sessionState.status === 'voting') {
+      globalPollingCount++
+      console.log(`🔍 POLL #${globalPollingCount} - useEffect triggered`)
+      
+      // Clear any existing timeout first
+      if (currentTimeout) {
+        console.log('🧹 Clearing previous timeout')
+        clearTimeout(currentTimeout)
+        currentTimeout = null
+      }
+      
+      try {
+        const activeUsers = figma.activeUsers || []
+        const currentUserIds = activeUsers.map(u => u.id).filter(id => id != null) as string[]
+        
+        console.log(`📊 Poll #${globalPollingCount}:`, {
+          activeUsersCount: activeUsers.length,
+          currentUserIds,
+          previousActiveUserIds: activeUserIds
+        })
+        
+        // Always sync participants
+        activeUsers.forEach(user => {
+          if (user.id && !participants.get(user.id)) {
+            console.log(`➕ Adding user:`, { userId: user.id, userName: user.name })
+            participants.set(user.id, {
+              userId: user.id,
+              userName: user.name || 'Anonymous',
+              isSpectator: false,
+              joinedAt: Date.now()
+            })
+          }
+        })
+        
+        // Check for changes
+        const usersJoined = currentUserIds.filter(id => !activeUserIds.includes(id))
+        const usersLeft = activeUserIds.filter(id => !currentUserIds.includes(id))
+        
+        if (usersJoined.length > 0 || usersLeft.length > 0 || JSON.stringify(currentUserIds) !== JSON.stringify(activeUserIds)) {
+          console.log(`🔄 Poll #${globalPollingCount} - Users changed:`, {
+            joined: usersJoined,
+            left: usersLeft
+          })
+          
+          // Remove users who left (preserve votes)
+          usersLeft.forEach(leftUserId => {
+            const participant = participants.get(leftUserId)
+            const hasVoted = votes.get(leftUserId)
+            if (participant && !hasVoted) {
+              console.log(`➖ Removing user:`, leftUserId)
+              participants.delete(leftUserId)
+            }
+          })
+          
+          // Update active user IDs
+          setActiveUserIds([...currentUserIds])
+        }
+        
+        // Schedule next poll cycle using waitForTask + timeout + re-render
+        console.log(`⏰ Scheduling next poll cycle in 3 seconds`)
+        const pollingTask = new Promise<void>((resolve) => {
+          currentTimeout = setTimeout(() => {
+            if (sessionState.status === 'voting') {
+              console.log(`🔄 Timeout fired - triggering re-render`)
+              setPollingTrigger(prev => prev + 1) // This triggers useEffect -> new poll cycle
+            }
+            resolve()
+          }, 1000)
+        })
+        
+        waitForTask(pollingTask)
+        
+      } catch (error) {
+        console.error(`❌ Poll #${globalPollingCount} error:`, error)
+      }
+      
+    } else {
+      // Reset when not in voting mode
+      if (currentTimeout) {
+        console.log('🛑 Clearing timeout (not in voting mode)')
+        clearTimeout(currentTimeout)
+        currentTimeout = null
+      }
+      if (globalPollingCount > 0) {
+        console.log('🛑 Resetting polling state')
+        globalPollingCount = 0
+      }
     }
   })
 
@@ -335,6 +433,7 @@ function Widget() {
         joinedAt: Date.now()
       })
       
+      // Reset polling state when starting - global interval will restart on next useEffect
       setSessionState({
         status: 'voting',
         facilitatorId: userId,
@@ -350,6 +449,7 @@ function Widget() {
         isSpectator: false,
         joinedAt: Date.now()
       })
+      // Global interval will restart on next useEffect
       setSessionState({
         status: 'voting',
         facilitatorId: fallbackId,
@@ -415,9 +515,48 @@ function Widget() {
       const userId = figma.currentUser?.id || sessionState.facilitatorId
       if (userId === sessionState.facilitatorId) {
         console.log('Revealing results')
+        
+        // Capture snapshot of current participants
+        const currentParticipants: Participant[] = []
+        try {
+          const activeUsers = figma.activeUsers || []
+          if (activeUsers.length > 0) {
+            // Use active users as the definitive participant list
+            activeUsers.forEach(user => {
+              if (user.id) {
+                const participant = participants.get(user.id)
+                currentParticipants.push({
+                  userId: user.id,
+                  userName: user.name || 'Anonymous',
+                  isSpectator: participant?.isSpectator || false,
+                  joinedAt: participant?.joinedAt || Date.now()
+                })
+              }
+            })
+          } else {
+            // Fallback to session participants
+            sessionState.participants.forEach(userId => {
+              const participant = participants.get(userId)
+              if (participant) {
+                currentParticipants.push(participant)
+              }
+            })
+          }
+        } catch (error) {
+          console.error('Error capturing participants snapshot:', error)
+          // Fallback to session participants
+          sessionState.participants.forEach(userId => {
+            const participant = participants.get(userId)
+            if (participant) {
+              currentParticipants.push(participant)
+            }
+          })
+        }
+        
         setSessionState({
           ...sessionState,
-          status: 'revealed'
+          status: 'revealed',
+          participantsSnapshot: currentParticipants
         })
       }
     } catch (error) {
@@ -433,9 +572,11 @@ function Widget() {
         console.log('Resetting session')
         // Clear all votes
         votes.keys().forEach(key => votes.delete(key))
+        // Reset polling state - global interval will restart on next useEffect
         setSessionState({
           ...sessionState,
-          status: 'voting'
+          status: 'voting',
+          participantsSnapshot: undefined  // Clear the snapshot for new session
         })
         setCount(0)
       }
@@ -517,6 +658,8 @@ function Widget() {
       <ResultsView
         voteResults={groupVotesByValue()}
         onReset={resetSession}
+        participantsSnapshot={sessionState.participantsSnapshot}
+        votes={votes}
       />
     )
   }
@@ -587,83 +730,37 @@ function Widget() {
       <AutoLayout direction="vertical" spacing={6} horizontalAlignItems="center">
         <Text fontSize={12} fill="#666666">
           Votes: {votes.size}/{(() => {
-            try {
-              // Use activeUsers if available, fallback to participants
-              const activeUsers = figma.activeUsers || []
-              return activeUsers.length > 0 ? activeUsers.length : sessionState.participants.filter(id => !participants.get(id)?.isSpectator).length
-            } catch (error) {
-              return sessionState.participants.filter(id => !participants.get(id)?.isSpectator).length
-            }
+            // Use tracked activeUserIds for consistent count (pollingTrigger ensures fresh render)
+            const _trigger = pollingTrigger
+            const eligibleVoters = activeUserIds.filter(id => {
+              const participant = participants.get(id)
+              return !participant?.isSpectator
+            })
+            return eligibleVoters.length > 0 ? eligibleVoters.length : sessionState.participants.filter(id => !participants.get(id)?.isSpectator).length
           })()}
         </Text>
         <AutoLayout direction="horizontal" spacing={8} wrap horizontalAlignItems="center">
           {(() => {
-            try {
-              // Show active users if available, fallback to participants
-              const activeUsers = figma.activeUsers || []
-              if (activeUsers.length > 0) {
-                return activeUsers.map(user => {
-                  if (!user.id) return null
-                  const hasVoted = votes.get(user.id) !== undefined
-                  const participant = participants.get(user.id)
-                  const isSpectator = participant?.isSpectator || false
-                  
-                  return (
-                    <AutoLayout
-                      key={user.id}
-                      padding={{ vertical: 2, horizontal: 6 }}
-                      fill={hasVoted ? "#28A745" : isSpectator ? "#6C757D" : "#FFC107"}
-                      cornerRadius={12}
-                    >
-                      <Text fontSize={10} fill="#FFFFFF">
-                        {user.name || 'Anonymous'}{isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
-                      </Text>
-                    </AutoLayout>
-                  )
-                })
-              } else {
-                // Fallback to session participants
-                return sessionState.participants.map(userId => {
-                  const participant = participants.get(userId)
-                  const hasVoted = votes.get(userId) !== undefined
-                  if (!participant) return null
-                  
-                  return (
-                    <AutoLayout
-                      key={userId}
-                      padding={{ vertical: 2, horizontal: 6 }}
-                      fill={hasVoted ? "#28A745" : participant.isSpectator ? "#6C757D" : "#FFC107"}
-                      cornerRadius={12}
-                    >
-                      <Text fontSize={10} fill="#FFFFFF">
-                        {participant.userName}{participant.isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
-                      </Text>
-                    </AutoLayout>
-                  )
-                })
-              }
-            } catch (error) {
-              console.error('Error displaying participants:', error)
-              // Final fallback to session participants
-              return sessionState.participants.map(userId => {
-                const participant = participants.get(userId)
-                const hasVoted = votes.get(userId) !== undefined
-                if (!participant) return null
-                
-                return (
-                  <AutoLayout
-                    key={userId}
-                    padding={{ vertical: 2, horizontal: 6 }}
-                    fill={hasVoted ? "#28A745" : participant.isSpectator ? "#6C757D" : "#FFC107"}
-                    cornerRadius={12}
-                  >
-                    <Text fontSize={10} fill="#FFFFFF">
-                      {participant.userName}{participant.isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
-                    </Text>
-                  </AutoLayout>
-                )
-              })
-            }
+            // Use tracked activeUserIds for consistent participant display (pollingTrigger ensures fresh render)
+            const _trigger = pollingTrigger
+            return activeUserIds.map(userId => {
+              const participant = participants.get(userId)
+              const hasVoted = votes.get(userId) !== undefined
+              if (!participant) return null
+              
+              return (
+                <AutoLayout
+                  key={userId}
+                  padding={{ vertical: 2, horizontal: 6 }}
+                  fill={hasVoted ? "#28A745" : participant.isSpectator ? "#6C757D" : "#FFC107"}
+                  cornerRadius={12}
+                >
+                  <Text fontSize={10} fill="#FFFFFF">
+                    {participant.userName}{participant.isSpectator ? " 👁️" : hasVoted ? " ✓" : ""}
+                  </Text>
+                </AutoLayout>
+              )
+            })
           })()}
         </AutoLayout>
       </AutoLayout>
