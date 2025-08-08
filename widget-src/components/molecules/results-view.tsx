@@ -33,13 +33,12 @@ export function ResultsView(props: ResultsViewProps) {
       fill="#FFFFFF"
       cornerRadius={12}
       stroke="#E6E6E6"
-      width={480}
     >
-      <Text fontSize={18} fontWeight="bold" horizontalAlignText="center">
+      <Text fontSize={24} fontWeight="bold" horizontalAlignText="center">
         🎯 Results Revealed
       </Text>
 
-      <Text fontSize={14} fill="#666666" horizontalAlignText="center">
+      <Text fontSize={18} fill="#666666" horizontalAlignText="center">
         Here's how everyone voted:
       </Text>
 
@@ -68,17 +67,17 @@ export function ResultsView(props: ResultsViewProps) {
               spacing={8}
               horizontalAlignItems="center"
             >
-              <Text fontSize={16} fontWeight="bold" fill="#856404">
+              <Text fontSize={18} fontWeight="bold" fill="#856404">
                 No Vote
               </Text>
-              <Text fontSize={12} fill="#856404">
+              <Text fontSize={14} fill="#856404">
                 ({nonVoters.length} participant
                 {nonVoters.length !== 1 ? "s" : ""})
               </Text>
             </AutoLayout>
             <AutoLayout direction="vertical" spacing={2}>
               {nonVoters.map((participant) => (
-                <Text key={participant.userId} fontSize={12} fill="#856404">
+                <Text key={participant.userId} fontSize={14} fill="#856404">
                   • {participant.userName}
                 </Text>
               ))}

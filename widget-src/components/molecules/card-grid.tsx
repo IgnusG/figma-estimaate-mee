@@ -18,13 +18,17 @@ export function CardGrid(props: CardGridProps) {
       ? props.cards.findIndex((card) => card.value === props.selectedValue)
       : -1;
 
+  // Fixed height to accommodate the largest scaled card (1.2 * 150 = 180)
+  const maxCardHeight = Math.round(150 * 1.2);
+  const containerHeight = maxCardHeight + 24; // Add padding
+
   return (
     <AutoLayout
       direction="horizontal"
       spacing={8}
       horizontalAlignItems="center"
       padding={{ horizontal: 12, vertical: 12 }}
-      height={160}
+      height={containerHeight}
     >
       {props.cards.map((card, index) => {
         const isSelected = props.selectedValue === card.value;

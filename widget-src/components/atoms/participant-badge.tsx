@@ -22,11 +22,11 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
 
   return (
     <AutoLayout
-      padding={{ vertical: 2, horizontal: 6 }}
+      padding={{ vertical: 4, horizontal: 8 }}
       fill={getBackgroundColor()}
       cornerRadius={12}
     >
-      <Text fontSize={10} fill="#FFFFFF">
+      <Text fontSize={12} fill="#FFFFFF" fontWeight="bold">
         {getDisplayText()}
       </Text>
     </AutoLayout>

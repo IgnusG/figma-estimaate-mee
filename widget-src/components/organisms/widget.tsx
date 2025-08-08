@@ -155,7 +155,6 @@ export function Widget() {
       fill="#FFFFFF"
       cornerRadius={12}
       stroke="#E6E6E6"
-      width={560}
     >
       <Text fontSize={16} fontWeight="bold">
         Choose your estimate

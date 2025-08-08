@@ -19,16 +19,16 @@ export function WelcomeContent(props: WelcomeContentProps) {
       cornerRadius={12}
       stroke="#E6E6E6"
     >
-      <Text fontSize={24} fontWeight="bold">
+      <Text fontSize={32} fontWeight="bold">
         🎯 Estimatee-Mee
       </Text>
-      <Text fontSize={16} fill="#666666" horizontalAlignText="center">
+      <Text fontSize={20} fill="#666666" horizontalAlignText="center">
         Start a planning poker session
       </Text>
       <ActionButton
         text="Start Session"
         variant="primary"
-        size="medium"
+        size="large"
         onClick={props.onStartSession}
       />
     </AutoLayout>

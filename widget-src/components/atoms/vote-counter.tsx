@@ -8,7 +8,7 @@ export interface VoteCounterProps {
 
 export function VoteCounter(props: VoteCounterProps) {
   return (
-    <Text fontSize={12} fill="#666666">
+    <Text fontSize={16} fill="#666666" fontWeight="bold">
       Votes: {props.currentVotes}/{props.totalParticipants}
     </Text>
   );

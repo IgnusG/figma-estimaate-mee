@@ -15,14 +15,14 @@ export function FacilitatorControls(props: FacilitatorControlsProps) {
       <ActionButton
         text="Reveal Results"
         variant="success"
-        size="small"
+        size="medium"
         onClick={props.onRevealResults}
       />
       {props.showResetButton && props.onResetSession && (
         <ActionButton
           text="Start New Round"
           variant="primary"
-          size="small"
+          size="medium"
           onClick={props.onResetSession}
         />
       )}

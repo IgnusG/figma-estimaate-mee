@@ -16,7 +16,7 @@ export const CARD_ASSET_URLS: Record<string | number, string> = {
 
   // Special joker cards
   "∞": `${ASSET_BASE_URL}/special-infinity.jpg`,
-  "?": `${ASSET_BASE_URL}/special-coffee.jpg`, // Using coffee for unknown
+  "?": `${ASSET_BASE_URL}/special-idk.jpg`,
   "🍕": `${ASSET_BASE_URL}/special-pizza.jpg`,
   "☕": `${ASSET_BASE_URL}/special-coffee.jpg`,
 };

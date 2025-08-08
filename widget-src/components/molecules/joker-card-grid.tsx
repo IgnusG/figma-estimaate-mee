@@ -18,13 +18,17 @@ export function JokerCardGrid(props: JokerCardGridProps) {
       ? props.cards.findIndex((card) => card.value === props.selectedValue)
       : -1;
 
+  // Fixed height to accommodate the largest scaled card (1.2 * 150 = 180)
+  const maxCardHeight = Math.round(150 * 1.2);
+  const containerHeight = maxCardHeight + 24; // Add padding
+
   return (
     <AutoLayout
       direction="horizontal"
-      spacing={8}
+      spacing={10}
       horizontalAlignItems="center"
       padding={{ horizontal: 12, vertical: 12 }}
-      height={160}
+      height={containerHeight}
     >
       {props.cards.map((card, index) => {
         const isSelected = props.selectedValue === card.value;
@@ -37,10 +41,10 @@ export function JokerCardGrid(props: JokerCardGridProps) {
         } else {
           // Selection exists - scale down based on distance from selected card
           const distanceFromSelected = Math.abs(index - selectedIndex);
-          // Selected card = 1.2 scale, others decrease by 0.1 per step
+          // Selected card = 1.15 scale (matching fibonacci cards), others decrease by 0.08 per step
           cardScale = isSelected
-            ? 1.2
-            : Math.max(0.7, 1.0 - distanceFromSelected * 0.1);
+            ? 1.15
+            : Math.max(0.75, 1.0 - distanceFromSelected * 0.08);
         }
 
         return (

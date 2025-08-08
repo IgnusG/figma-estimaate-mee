@@ -25,16 +25,16 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
         spacing={8}
         horizontalAlignItems="center"
       >
-        <Text fontSize={16} fontWeight="bold">
+        <Text fontSize={18} fontWeight="bold">
           {props.value}
         </Text>
-        <Text fontSize={12} fill="#666666">
+        <Text fontSize={14} fill="#666666">
           ({props.count} vote{props.count !== 1 ? "s" : ""})
         </Text>
       </AutoLayout>
       <AutoLayout direction="vertical" spacing={2}>
         {props.participants.map((participant) => (
-          <Text key={participant.userId} fontSize={12} fill="#333333">
+          <Text key={participant.userId} fontSize={14} fill="#333333">
             • {participant.name}
           </Text>
         ))}
