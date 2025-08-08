@@ -24,7 +24,7 @@ export function JokerCardGrid(props: JokerCardGridProps) {
       spacing={8}
       horizontalAlignItems="center"
       padding={{ horizontal: 12, vertical: 12 }}
-      height={110}
+      height={160}
     >
       {props.cards.map((card, index) => {
         const isSelected = props.selectedValue === card.value;
@@ -52,6 +52,7 @@ export function JokerCardGrid(props: JokerCardGridProps) {
             tooltip={card.tooltip}
             isSelected={isSelected}
             cardScale={cardScale}
+            assetPath={card.assetPath}
             onClick={() => {
               if (!props.disabled) {
                 props.onCardClick(card.value as string);

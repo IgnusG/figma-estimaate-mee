@@ -35,6 +35,7 @@ export interface CardData {
   title: string;
   emoji: string;
   tooltip: string;
+  assetPath: string;
 }
 
 // Type for Figma SyncedMap which doesn't fully match Map interface

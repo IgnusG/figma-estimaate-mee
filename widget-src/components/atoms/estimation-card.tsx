@@ -1,5 +1,5 @@
 const { widget } = figma;
-const { AutoLayout, Text } = widget;
+const { AutoLayout, Text, Image } = widget;
 
 export interface EstimationCardProps {
   value: number;
@@ -9,58 +9,87 @@ export interface EstimationCardProps {
   isSelected: boolean;
   onClick: () => void;
   cardScale?: number;
+  assetPath?: string;
 }
 
 export function EstimationCard(props: EstimationCardProps) {
   const scale = props.cardScale || 1.0;
-  const baseWidth = 58;
-  const baseHeight = 78;
-  const baseFontSize = 12;
-  const baseEmojiFontSize = 14;
-  const baseTitleFontSize = 8;
+  const baseWidth = 88; // Increased from 58
+  const baseHeight = 120; // Increased from 78
+  const baseTitleFontSize = 10; // Increased from 8
 
   const scaledWidth = Math.round(baseWidth * scale);
   const scaledHeight = Math.round(baseHeight * scale);
-  const scaledFontSize = Math.round(baseFontSize * scale);
-  const scaledEmojiFontSize = Math.round(baseEmojiFontSize * scale);
   const scaledTitleFontSize = Math.round(baseTitleFontSize * scale);
+
+  // For now, we'll use a placeholder background until assets are optimized
+  const backgroundColor = props.isSelected ? "#007AFF" : "#F8F9FA";
+  const borderColor = props.isSelected ? "#007AFF" : "#E1E5E9";
 
   return (
     <AutoLayout
       direction="vertical"
       horizontalAlignItems="center"
       verticalAlignItems="center"
-      padding={Math.round(8 * scale)}
-      spacing={Math.round(4 * scale)}
+      padding={Math.round(12 * scale)}
       width={scaledWidth}
       height={scaledHeight}
-      fill={props.isSelected ? "#007AFF" : "#FFFFFF"}
-      stroke={props.isSelected ? "#007AFF" : "#E6E6E6"}
+      fill={backgroundColor}
+      stroke={borderColor}
       strokeWidth={props.isSelected ? 3 : 2}
-      cornerRadius={Math.round(8 * scale)}
+      cornerRadius={Math.round(12 * scale)}
       onClick={props.onClick}
       tooltip={props.tooltip}
       hoverStyle={{
-        fill: props.isSelected ? "#0056CC" : "#F0F8FF",
+        fill: props.isSelected ? "#0056CC" : "#E8F3FF",
         stroke: props.isSelected ? "#0056CC" : "#007AFF",
       }}
     >
-      <Text fontSize={scaledEmojiFontSize}>{props.emoji}</Text>
-      <Text
-        fontSize={scaledFontSize}
-        fontWeight="bold"
-        fill={props.isSelected ? "#FFFFFF" : "#000000"}
-      >
-        {props.value}
-      </Text>
-      <Text
-        fontSize={scaledTitleFontSize}
-        horizontalAlignText="center"
-        fill={props.isSelected ? "#FFFFFF" : "#666666"}
+      {/* Main content area - this is where the asset image will go */}
+      <AutoLayout
+        direction="vertical"
+        horizontalAlignItems="center"
+        verticalAlignItems="center"
         width="fill-parent"
+        height="fill-parent"
+        spacing={Math.round(8 * scale)}
       >
-        {props.title}
-      </Text>
+        {/* Asset image or placeholder */}
+        {props.assetPath ? (
+          <Image
+            src={props.assetPath}
+            width={Math.round(64 * scale)}
+            height={Math.round(64 * scale)}
+          />
+        ) : (
+          <AutoLayout
+            width={Math.round(56 * scale)}
+            height={Math.round(56 * scale)}
+            horizontalAlignItems="center"
+            verticalAlignItems="center"
+            fill="#FFFFFF"
+            cornerRadius={Math.round(8 * scale)}
+          >
+            <Text
+              fontSize={Math.round(28 * scale)}
+              fill={props.isSelected ? "#007AFF" : "#333333"}
+              fontWeight="bold"
+            >
+              {props.value}
+            </Text>
+          </AutoLayout>
+        )}
+        
+        {/* Title - always visible */}
+        <Text
+          fontSize={scaledTitleFontSize}
+          horizontalAlignText="center"
+          fill={props.isSelected ? "#FFFFFF" : "#666666"}
+          width="fill-parent"
+        >
+          {props.title}
+        </Text>
+      </AutoLayout>
     </AutoLayout>
   );
 }

@@ -21,10 +21,10 @@ export function CardGrid(props: CardGridProps) {
   return (
     <AutoLayout
       direction="horizontal"
-      spacing={4}
+      spacing={8}
       horizontalAlignItems="center"
       padding={{ horizontal: 12, vertical: 12 }}
-      height={120}
+      height={160}
     >
       {props.cards.map((card, index) => {
         const isSelected = props.selectedValue === card.value;
@@ -52,6 +52,7 @@ export function CardGrid(props: CardGridProps) {
             tooltip={card.tooltip}
             isSelected={isSelected}
             cardScale={cardScale}
+            assetPath={card.assetPath}
             onClick={() => {
               if (!props.disabled) {
                 props.onCardClick(card.value as number);
