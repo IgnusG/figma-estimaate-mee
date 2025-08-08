@@ -18,7 +18,7 @@ export function useUserPolling(
   participants: SyncedMapLike<Participant>,
   activeUserIds: string[],
   setActiveUserIds: (ids: string[]) => void,
-  setPollingTrigger: (fn: (prev: number) => number) => void
+  setPollingTrigger: (fn: (prev: number) => number) => void,
 ): UseUserPollingReturn {
   useEffect(() => {
     if (sessionStatus === "voting") {
@@ -62,10 +62,10 @@ export function useUserPolling(
 
         // Check for changes
         const usersJoined = currentUserIds.filter(
-          (id) => !activeUserIds.includes(id)
+          (id) => !activeUserIds.includes(id),
         );
         const usersLeft = activeUserIds.filter(
-          (id) => !currentUserIds.includes(id)
+          (id) => !currentUserIds.includes(id),
         );
 
         if (
@@ -100,7 +100,7 @@ export function useUserPolling(
         waitForTask(
           new Promise<void>((resolve) => {
             promiseResolve = resolve;
-          })
+          }),
         );
 
         currentTimeout = setTimeout(() => {

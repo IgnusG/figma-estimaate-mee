@@ -1,7 +1,13 @@
-import { getCardAssetURL } from './asset-urls';
+import { getCardAssetURL } from "./asset-urls";
 
 export const FIBONACCI_CARDS = [
-  { value: 0, title: "No Work", emoji: "🚫", tooltip: "No effort required", assetPath: getCardAssetURL(0) },
+  {
+    value: 0,
+    title: "No Work",
+    emoji: "🚫",
+    tooltip: "No effort required",
+    assetPath: getCardAssetURL(0),
+  },
   {
     value: 0.5,
     title: "Tiny Task",
@@ -37,7 +43,13 @@ export const FIBONACCI_CARDS = [
     tooltip: "Some complexity, 2-3 days",
     assetPath: getCardAssetURL(5),
   },
-  { value: 8, title: "Big Task", emoji: "💪", tooltip: "Complex work, 1 week", assetPath: getCardAssetURL(8) },
+  {
+    value: 8,
+    title: "Big Task",
+    emoji: "💪",
+    tooltip: "Complex work, 1 week",
+    assetPath: getCardAssetURL(8),
+  },
   {
     value: 13,
     title: "Heavy Lift",

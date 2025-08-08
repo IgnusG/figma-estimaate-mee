@@ -12,7 +12,7 @@ export function useVoting(
   votes: SyncedMapLike<Vote>,
   currentUserId: string,
   count: number,
-  setCount: (count: number) => void
+  setCount: (count: number) => void,
 ): UseVotingReturn {
   const handleVote = (value: number | string) => {
     try {

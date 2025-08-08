@@ -19,9 +19,10 @@ export function FibonacciCardGrid(props: FibonacciCardGridProps) {
   // Function to render a row of cards with independent scaling
   const renderCardRow = (rowCards: CardData[]) => {
     // Find the selected card index within this row
-    const selectedIndex = props.selectedValue !== undefined
-      ? rowCards.findIndex((card) => card.value === props.selectedValue)
-      : -1;
+    const selectedIndex =
+      props.selectedValue !== undefined
+        ? rowCards.findIndex((card) => card.value === props.selectedValue)
+        : -1;
 
     return (
       <AutoLayout
@@ -70,14 +71,10 @@ export function FibonacciCardGrid(props: FibonacciCardGridProps) {
   };
 
   return (
-    <AutoLayout
-      direction="vertical"
-      spacing={12}
-      horizontalAlignItems="center"
-    >
+    <AutoLayout direction="vertical" spacing={12} horizontalAlignItems="center">
       {/* First row: 5 cards */}
       {renderCardRow(firstRowCards)}
-      
+
       {/* Second row: 3 cards */}
       {renderCardRow(secondRowCards)}
     </AutoLayout>

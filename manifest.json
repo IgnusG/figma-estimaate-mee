@@ -6,18 +6,11 @@
   "capabilities": [],
   "enableProposedApi": false,
   "documentAccess": "dynamic-page",
-  "editorType": [
-    "figjam"
-  ],
+  "editorType": ["figjam"],
   "containsWidget": true,
   "widgetApi": "1.0.0",
-  "permissions": [
-    "currentuser",
-    "activeusers"
-  ],
+  "permissions": ["currentuser", "activeusers"],
   "networkAccess": {
-    "allowedDomains": [
-      "https://raw.githubusercontent.com"
-    ]
+    "allowedDomains": ["https://raw.githubusercontent.com"]
   }
 }

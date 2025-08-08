@@ -109,7 +109,7 @@ describe("Estimatee-Mee Widget", () => {
           participants: [],
         };
         expect(["waiting", "voting", "revealed"]).toContain(
-          sessionState.status
+          sessionState.status,
         );
       });
     });

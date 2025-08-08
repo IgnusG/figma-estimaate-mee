@@ -1,4 +1,4 @@
-import { SessionState, Participant, Vote, SyncedMapLike } from '../utils/types';
+import { SessionState, Participant, Vote, SyncedMapLike } from "../utils/types";
 
 export interface UseSessionStateReturn {
   sessionState: SessionState;
@@ -12,9 +12,8 @@ export function useSessionState(
   sessionState: SessionState,
   setSessionState: (state: SessionState) => void,
   participants: SyncedMapLike<Participant>,
-  votes: SyncedMapLike<Vote>
+  votes: SyncedMapLike<Vote>,
 ): UseSessionStateReturn {
-  
   const startSession = () => {
     try {
       const userId = figma.currentUser?.id || `user-${Date.now()}`;

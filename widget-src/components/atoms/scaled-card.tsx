@@ -20,7 +20,7 @@ export function ScaledCard(props: ScaledCardProps) {
     } else {
       // Selection exists - scale down based on distance from selected card
       const distanceFromSelected = Math.abs(
-        props.currentIndex - props.selectedIndex
+        props.currentIndex - props.selectedIndex,
       );
       // Selected card = 1.2 scale, others decrease by 0.1 per step
       return props.isSelected

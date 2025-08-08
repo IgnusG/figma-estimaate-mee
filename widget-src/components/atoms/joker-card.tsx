@@ -23,12 +23,12 @@ export function JokerCard(props: JokerCardProps) {
   const maxScale = 1.2; // Maximum scale we expect
   const containerWidth = Math.round(baseWidth * maxScale);
   const containerHeight = Math.round(baseHeight * maxScale);
-  
+
   // Scaled content dimensions
   const scaledWidth = Math.round(baseWidth * scale);
   const scaledHeight = Math.round(baseHeight * scale);
   // const scaledTitleFontSize = Math.round(baseTitleFontSize * scale); // Unused after removing title
-  
+
   // Center the scaled content within the fixed container
   // Note: Centering is handled by AutoLayout alignment properties
   // const contentOffsetX = Math.round((containerWidth - scaledWidth) / 2);
@@ -43,9 +43,9 @@ export function JokerCard(props: JokerCardProps) {
       width: containerWidth,
       height: containerHeight,
       onClick: props.onClick,
-      tooltip: props.tooltip
+      tooltip: props.tooltip,
     };
-    
+
     return (
       <AutoLayout {...layoutProps}>
         {/* Container for scaled image to center it */}
@@ -74,7 +74,7 @@ export function JokerCard(props: JokerCardProps) {
               offset: { x: 0, y: Math.round(2 * scale) },
               blur: Math.round(16 * scale),
               spread: 0,
-            }
+            },
           ]}
         >
           <Image
@@ -83,7 +83,7 @@ export function JokerCard(props: JokerCardProps) {
             height={scaledHeight}
           />
         </AutoLayout>
-        
+
         {/* Optional overlay for title on hover - could be implemented later */}
       </AutoLayout>
     );
@@ -126,7 +126,7 @@ export function JokerCard(props: JokerCardProps) {
             offset: { x: 0, y: Math.round(2 * scale) },
             blur: Math.round(16 * scale),
             spread: 0,
-          }
+          },
         ]}
       >
         <Text

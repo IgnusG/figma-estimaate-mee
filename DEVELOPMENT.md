@@ -7,6 +7,7 @@ A comprehensive guide for developing, testing, and working with the Figma API wi
 **Estimatee-Mee** is a Figma widget built with TypeScript that serves as a scaffold for developing interactive Figma widgets. The current implementation includes a counter widget with increment/decrement functionality.
 
 ### Key Features
+
 - TypeScript-based development
 - ESBuild for fast compilation
 - ESLint integration with Figma-specific rules
@@ -47,6 +48,7 @@ figma-estimaate-mee/
 ## Setup & Installation
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
@@ -65,23 +67,25 @@ figma-estimaate-mee/
 
 ## Development Scripts
 
-| Script | Command | Description |
-|--------|---------|-------------|
-| **Build** | `npm run build` | Compiles TypeScript to JavaScript using ESBuild |
-| **Watch** | `npm run watch` | Builds and watches for file changes |
-| **Lint** | `npm run lint` | Runs ESLint on TypeScript files |
-| **Lint Fix** | `npm run lint:fix` | Runs ESLint with automatic fixes |
-| **Type Check** | `npm run tsc` | Runs TypeScript compiler without emitting files |
+| Script         | Command            | Description                                     |
+| -------------- | ------------------ | ----------------------------------------------- |
+| **Build**      | `npm run build`    | Compiles TypeScript to JavaScript using ESBuild |
+| **Watch**      | `npm run watch`    | Builds and watches for file changes             |
+| **Lint**       | `npm run lint`     | Runs ESLint on TypeScript files                 |
+| **Lint Fix**   | `npm run lint:fix` | Runs ESLint with automatic fixes                |
+| **Type Check** | `npm run tsc`      | Runs TypeScript compiler without emitting files |
 
 ## Dependencies
 
 ### Core Dependencies
+
 - **@figma/widget-typings**: TypeScript definitions for Figma Widget API
 - **@figma/plugin-typings**: TypeScript definitions for Figma Plugin API
 - **esbuild**: Fast JavaScript bundler for compilation
 - **typescript**: TypeScript compiler
 
 ### Development Tools
+
 - **@figma/eslint-plugin-figma-plugins**: ESLint rules specific to Figma development
 - **@typescript-eslint/eslint-plugin**: TypeScript-specific ESLint rules
 - **@typescript-eslint/parser**: TypeScript parser for ESLint
@@ -89,6 +93,7 @@ figma-estimaate-mee/
 ## Figma Widget Configuration
 
 ### Manifest Configuration (`manifest.json`)
+
 ```json
 {
   "name": "Estimatee-Mee",
@@ -108,6 +113,7 @@ figma-estimaate-mee/
 ```
 
 ### Key Configuration Options
+
 - **`editorType`**: Currently set to `["figjam"]` for FigJam support
 - **`documentAccess`**: Set to `"dynamic-page"` for page-level access
 - **`networkAccess`**: Currently restricted to `["none"]`
@@ -122,36 +128,44 @@ figma-estimaate-mee/
 Widgets are interactive objects that extend the functionality of design files and FigJam boards. Unlike plugins that run for a specific person, everyone can see and interact with the same widget.
 
 1. **Widget Registration**
+
    ```typescript
-   const { widget } = figma
-   const { useSyncedState, usePropertyMenu, AutoLayout, Text, SVG } = widget
-   
+   const { widget } = figma;
+   const { useSyncedState, usePropertyMenu, AutoLayout, Text, SVG } = widget;
+
    function Widget() {
      // Widget implementation
    }
-   
-   widget.register(Widget) // Main entry point for rendering
+
+   widget.register(Widget); // Main entry point for rendering
    ```
 
 2. **Synced State Management**
+
    ```typescript
-   const [count, setCount] = useSyncedState('count', 0)
+   const [count, setCount] = useSyncedState("count", 0);
    ```
+
    - Maintains state across widget instances
    - Persists data in Figma document
    - Uses storage key and default value pattern
 
 3. **Property Menu Integration**
+
    ```typescript
-   usePropertyMenu([
-     {
-       itemType: 'action',
-       propertyName: 'reset',
-       tooltip: 'Reset',
-       icon: `<svg>...</svg>`
-     }
-   ], callback)
+   usePropertyMenu(
+     [
+       {
+         itemType: "action",
+         propertyName: "reset",
+         tooltip: "Reset",
+         icon: `<svg>...</svg>`,
+       },
+     ],
+     callback,
+   );
    ```
+
    - Specifies the property menu shown when widget is selected
    - Supports actions, dropdowns, and other interactive elements
 
@@ -161,6 +175,7 @@ Widgets are interactive objects that extend the functionality of design files an
    - **Interactive**: All components support click handlers and styling
 
 ### Additional Hooks Available
+
 - **`useEffect`**: Runs when widget state changes
 - **`useStickable`**: Allows widgets to stick to other nodes (FigJam only)
 - **`useSyncedMap`**: Manages widget state with multiple keys
@@ -169,6 +184,7 @@ Widgets are interactive objects that extend the functionality of design files an
 ### TypeScript Configuration
 
 The widget uses custom JSX configuration for Figma:
+
 ```json
 {
   "jsx": "react",
@@ -181,6 +197,7 @@ The widget uses custom JSX configuration for Figma:
 ## Testing & Quality Assurance
 
 ### Code Quality Tools
+
 1. **ESLint Configuration**
    - Extends Figma-specific rules
    - TypeScript integration
@@ -190,10 +207,12 @@ The widget uses custom JSX configuration for Figma:
    ```bash
    npm run tsc
    ```
+
    - Validates TypeScript without compilation
    - Catches type errors early
 
 ### Recommended Testing Workflow
+
 1. Run `npm run watch` for continuous compilation
 2. Use Figma Desktop app's development mode for real-time testing
 3. Validate with `npm run lint` and `npm run tsc`
@@ -206,11 +225,13 @@ The widget uses custom JSX configuration for Figma:
 ## Deployment Process
 
 1. **Build Production Code**
+
    ```bash
    npm run build
    ```
 
 2. **Validate Code Quality**
+
    ```bash
    npm run lint
    npm run tsc
@@ -225,6 +246,7 @@ The widget uses custom JSX configuration for Figma:
 ## API Reference & Resources
 
 ### Official Documentation
+
 - [**Figma Widget API Documentation**](https://www.figma.com/widget-docs/) - Main documentation hub
 - [**API Reference**](https://www.figma.com/widget-docs/api/api-reference/) - Complete API reference
 - [**Setup Guide**](https://www.figma.com/widget-docs/setup-guide/) - Getting started tutorial
@@ -234,6 +256,7 @@ The widget uses custom JSX configuration for Figma:
 - [**Figma Plugin API Reference**](https://www.figma.com/plugin-docs/) - Plugin API documentation
 
 ### Learning Resources
+
 - [**Widget Samples Repository**](https://github.com/figma/widget-samples) - Official code examples
   - Counter widget (demonstrates `useSyncedState`)
   - Notepad (shows `Input` component usage)
@@ -243,10 +266,12 @@ The widget uses custom JSX configuration for Figma:
   - And more examples for various use cases
 
 ### Community & Support
+
 - [**Figma Community Forum**](https://forum.figma.com/c/plugin-widget-api/20) - Developer discussions
 - [**Discord Server**](https://discord.gg/xzQhe2Vcvx) - Real-time community support
 
 ### Development Tools
+
 - [**TypeScript Handbook**](https://www.typescriptlang.org/) - TypeScript language reference
 - **IntelliSense Support**: Type definitions include docstrings (2025 update)
 - **VS Code Extensions**: Enhanced support for Figma development
@@ -254,20 +279,22 @@ The widget uses custom JSX configuration for Figma:
 ## Common Development Patterns
 
 ### State Management
+
 ```typescript
 // Single value
-const [value, setValue] = useSyncedState('key', defaultValue)
+const [value, setValue] = useSyncedState("key", defaultValue);
 
 // Complex objects
-const [data, setData] = useSyncedState('data', { 
-  items: [], 
-  settings: {} 
-})
+const [data, setData] = useSyncedState("data", {
+  items: [],
+  settings: {},
+});
 ```
 
 ### Event Handling
+
 ```typescript
-<SVG 
+<SVG
   src="..."
   onClick={() => {
     // Handle click events
@@ -277,6 +304,7 @@ const [data, setData] = useSyncedState('data', {
 ```
 
 ### Conditional Rendering
+
 ```typescript
 {condition && (
   <Text>Conditional content</Text>
@@ -286,11 +314,13 @@ const [data, setData] = useSyncedState('data', {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Build Errors**: Check TypeScript configuration and imports
 2. **Widget Not Loading**: Verify `manifest.json` and built file path
 3. **Type Errors**: Ensure proper Figma API usage and type definitions
 
 ### Development Tips
+
 - Use VS Code for best TypeScript experience with inline API documentation
 - Keep `npm run watch` running during development for automatic compilation
 - Test frequently in Figma Desktop app's development environment
@@ -302,6 +332,7 @@ const [data, setData] = useSyncedState('data', {
 ## Contributing
 
 When extending this widget:
+
 1. Follow existing TypeScript patterns
 2. Maintain ESLint compliance
 3. Update manifest.json for new capabilities

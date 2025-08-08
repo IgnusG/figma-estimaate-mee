@@ -20,16 +20,16 @@ export function Widget() {
       status: "waiting",
       facilitatorId: "",
       participants: [],
-    }
+    },
   );
   const [myUserId, setMyUserId] = useSyncedState<string>("myUserId", "");
   const [activeUserIds, setActiveUserIds] = useSyncedState<string[]>(
     "activeUserIds",
-    []
+    [],
   );
   const [pollingTrigger, setPollingTrigger] = useSyncedState<number>(
     "pollingTrigger",
-    0
+    0,
   );
   const votes = useSyncedMap<Vote>("votes");
   const participants = useSyncedMap<Participant>("participants");
@@ -55,7 +55,7 @@ export function Widget() {
     participants,
     activeUserIds,
     setActiveUserIds,
-    setPollingTrigger
+    setPollingTrigger,
   );
 
   // Handle user cleanup for votes when users leave
@@ -68,7 +68,7 @@ export function Widget() {
         .filter((id) => id != null) as string[];
 
       const usersLeft = activeUserIds.filter(
-        (id) => !currentUserIds.includes(id)
+        (id) => !currentUserIds.includes(id),
       );
 
       usersLeft.forEach((leftUserId) => {
@@ -85,7 +85,7 @@ export function Widget() {
     sessionStateData,
     setSessionStateData,
     participants,
-    votes
+    votes,
   );
 
   const votingControls = useVoting(votes, myUserId, count, setCount);
@@ -123,7 +123,7 @@ export function Widget() {
     eligibleVoters.length > 0
       ? eligibleVoters.length
       : sessionStateData.participants.filter(
-          (id) => !participants.get(id)?.isSpectator
+          (id) => !participants.get(id)?.isSpectator,
         ).length;
 
   const participantStatusData = activeUserIds

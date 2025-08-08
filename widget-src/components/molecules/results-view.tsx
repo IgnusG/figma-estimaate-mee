@@ -22,7 +22,7 @@ export function ResultsView(props: ResultsViewProps) {
   const nonVoters =
     props.participantsSnapshot?.filter(
       (participant) =>
-        !participant.isSpectator && !props.votes.get(participant.userId)
+        !participant.isSpectator && !props.votes.get(participant.userId),
     ) || [];
 
   return (
