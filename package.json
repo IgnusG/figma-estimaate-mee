@@ -9,7 +9,10 @@
     "tsc": "tsc --noEmit -p widget-src",
     "watch": "npm run build -- --watch",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:watch": "vitest --watch",
+    "ci": "npm run tsc && npm run lint && npm run test && npm run build"
   },
   "author": "",
   "license": "",
