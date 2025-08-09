@@ -1,4 +1,5 @@
 import { SessionState, Participant, Vote, SyncedMapLike } from "../utils/types";
+import { debug } from "../utils/debug";
 
 export interface UseSessionStateReturn {
   sessionState: SessionState;
@@ -19,7 +20,7 @@ export function useSessionState(
       const userId = figma.currentUser?.id || `user-${Date.now()}`;
       const userName = figma.currentUser?.name || "Anonymous";
 
-      console.log("Starting session:", { userId, userName });
+      debug.log("Starting session:", { userId, userName });
 
       // Add facilitator as participant
       participants.set(userId, {
@@ -35,7 +36,7 @@ export function useSessionState(
         participants: [userId],
       });
     } catch (error) {
-      console.error("Error starting session:", error);
+      debug.error("Error starting session:", error);
       // Fallback without currentUser
       const fallbackId = `user-${Date.now()}`;
       participants.set(fallbackId, {
@@ -57,7 +58,7 @@ export function useSessionState(
       // Only facilitator can reveal results
       const userId = figma.currentUser?.id;
       if (userId && userId === sessionState.facilitatorId) {
-        console.log("Revealing results");
+        debug.log("Revealing results");
 
         // Capture snapshot of current participants
         const currentParticipants: Participant[] = [];
@@ -86,7 +87,7 @@ export function useSessionState(
             });
           }
         } catch (error) {
-          console.error("Error capturing participants snapshot:", error);
+          debug.error("Error capturing participants snapshot:", error);
           // Fallback to session participants
           sessionState.participants.forEach((userId) => {
             const participant = participants.get(userId);
@@ -103,7 +104,7 @@ export function useSessionState(
         });
       }
     } catch (error) {
-      console.error("Error revealing results:", error);
+      debug.error("Error revealing results:", error);
     }
   };
 
@@ -112,7 +113,7 @@ export function useSessionState(
       // Only facilitator can reset
       const userId = figma.currentUser?.id;
       if (userId && userId === sessionState.facilitatorId) {
-        console.log("Resetting session");
+        debug.log("Resetting session");
         // Clear all votes
         for (const key of votes.keys()) {
           votes.delete(key);
@@ -124,7 +125,7 @@ export function useSessionState(
         });
       }
     } catch (error) {
-      console.error("Error resetting session:", error);
+      debug.error("Error resetting session:", error);
     }
   };
 
@@ -152,7 +153,7 @@ export function useSessionState(
         }
       }
     } catch (error) {
-      console.error("Error joining session:", error);
+      debug.error("Error joining session:", error);
     }
   };
 

@@ -11,9 +11,11 @@ import { UnifiedCardGrid } from "../molecules/unified-card-grid";
 import { ParticipantStatus } from "../molecules/participant-status";
 import { FacilitatorControls } from "../molecules/facilitator-controls";
 import { ResultsView } from "../molecules/results-view";
+import { debug } from "../../utils/debug";
 
 export function Widget() {
   const [count, setCount] = useSyncedState("count", 0);
+  const [debugEnabled, setDebugEnabled] = useSyncedState("debugEnabled", false);
   const [sessionStateData, setSessionStateData] = useSyncedState<SessionState>(
     "session",
     {
@@ -35,6 +37,15 @@ export function Widget() {
   const participants = useSyncedMap<Participant>("participants");
 
 
+  // Sync debug state
+  useEffect(() => {
+    if (debugEnabled) {
+      debug.enable();
+    } else {
+      debug.disable();
+    }
+  });
+
   // Initialize current user ID
   useEffect(() => {
     try {
@@ -42,11 +53,11 @@ export function Widget() {
       const userName = figma.currentUser?.name || "Anonymous";
 
       if (userId && userId !== myUserId) {
-        console.log("Setting current user ID:", { userId, userName });
+        debug.log("Setting current user ID:", { userId, userName });
         setMyUserId(userId);
       }
     } catch (error) {
-      console.error("Error initializing user:", error);
+      debug.error("Error initializing user:", error);
     }
   });
 
@@ -58,7 +69,7 @@ export function Widget() {
       if (!currentParticipant) {
         // Register current user as participant
         const userName = figma.currentUser?.name || "Anonymous";
-        console.log("Registering current user in participant map:", { myUserId, userName });
+        debug.log("Registering current user in participant map:", { myUserId, userName });
         
         participants.set(myUserId, {
           userId: myUserId,
@@ -208,9 +219,30 @@ export function Widget() {
       cornerRadius={12}
       stroke="#E6E6E6"
     >
-      <Text fontSize={18} fontWeight="bold">
-        Choose your estimate
-      </Text>
+      <AutoLayout
+        direction="horizontal"
+        width="fill-parent"
+        horizontalAlignItems="center"
+        verticalAlignItems="center"
+      >
+        <Text fontSize={18} fontWeight="bold">
+          Choose your estimate
+        </Text>
+        <AutoLayout horizontalAlignItems="end" width="fill-parent">
+          <AutoLayout
+            onClick={() => setDebugEnabled(!debugEnabled)}
+            padding={4}
+            cornerRadius={4}
+            fill={debugEnabled ? "#E6F7FF" : "#F5F5F5"}
+            stroke={debugEnabled ? "#1890FF" : "#D9D9D9"}
+            strokeWidth={1}
+          >
+            <Text fontSize={10} fill={debugEnabled ? "#1890FF" : "#8C8C8C"}>
+              {debugEnabled ? "🐛 Debug ON" : "🐛 Debug OFF"}
+            </Text>
+          </AutoLayout>
+        </AutoLayout>
+      </AutoLayout>
 
       <ParticipantStatus
         currentVotes={votes.size}

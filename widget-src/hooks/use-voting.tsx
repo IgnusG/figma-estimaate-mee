@@ -1,5 +1,6 @@
 import { Vote, VoteResult, SyncedMapLike } from "../utils/types";
 import { groupVotesByValue } from "../utils/vote-utils";
+import { debug } from "../utils/debug";
 
 export interface UseVotingReturn {
   votes: SyncedMapLike<Vote>;
@@ -16,7 +17,7 @@ export function useVoting(
 ): UseVotingReturn {
   // Early return if currentUserId is falsy (during initial loading state)
   if (!currentUserId) {
-    console.log("useVoting: currentUserId is falsy, returning noop");
+    debug.log("useVoting: currentUserId is falsy, returning noop");
     return {
       votes,
       handleVote: () => {}, // noop function
@@ -31,15 +32,15 @@ export function useVoting(
       const userId = currentUserId;
       const userName = figma.currentUser?.name || "Anonymous";
 
-      console.log("Handling vote:", { userId, userName, value, currentUserId });
+      debug.log("Handling vote:", { userId, userName, value, currentUserId });
 
       if (value === undefined) {
         // Clear the vote by removing it from the map
-        console.log("Clearing vote for user:", userId);
+        debug.log("Clearing vote for user:", userId);
         votes.delete(userId);
       } else {
         // Set the vote
-        console.log("Storing vote:", { userId, userName, value });
+        debug.log("Storing vote:", { userId, userName, value });
         votes.set(userId, {
           userId,
           userName,
@@ -50,7 +51,7 @@ export function useVoting(
 
       setCount(count + 1);
     } catch (error) {
-      console.error("Error in vote handler:", error);
+      debug.error("Error in vote handler:", error);
       // Fallback without map storage
       setCount(count + 1);
     }

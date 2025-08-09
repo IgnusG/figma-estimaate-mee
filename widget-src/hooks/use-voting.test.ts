@@ -148,18 +148,13 @@ describe("useVoting hook", () => {
         }),
       } as SyncedMapLike<Vote>;
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { handleVote } = useVoting(errorVotes, "user-123", 0, mockSetCount);
 
       // Should not throw when delete fails
       expect(() => handleVote(undefined)).not.toThrow();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error in vote handler:",
-        expect.any(Error)
-      );
+      // The error is now logged via debug.error which won't show unless debug is enabled
+      // Just verify the count was still updated despite the error
       expect(mockSetCount).toHaveBeenCalledWith(1);
-
-      consoleSpy.mockRestore();
     });
   });
 

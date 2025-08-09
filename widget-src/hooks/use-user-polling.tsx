@@ -2,6 +2,7 @@ const { widget } = figma;
 const { useEffect, waitForTask } = widget;
 
 import { SessionStatus, Participant, SyncedMapLike } from "../utils/types";
+import { debug } from "../utils/debug";
 
 export interface UseUserPollingReturn {
   activeUserIds: string[];
@@ -23,11 +24,11 @@ export function useUserPolling(
   useEffect(() => {
     if (sessionStatus === "voting") {
       globalPollingCount++;
-      console.log(`🔍 POLL #${globalPollingCount} - useEffect triggered`);
+      debug.log(`🔍 POLL #${globalPollingCount} - useEffect triggered`);
 
       // Clear any existing timeout first
       if (currentTimeout) {
-        console.log("🧹 Clearing previous timeout");
+        debug.log("🧹 Clearing previous timeout");
         clearTimeout(currentTimeout);
         currentTimeout = null;
       }
@@ -38,7 +39,7 @@ export function useUserPolling(
           .map((u) => u.id)
           .filter((id) => id != null) as string[];
 
-        console.log(`📊 Poll #${globalPollingCount}:`, {
+        debug.log(`📊 Poll #${globalPollingCount}:`, {
           activeUsersCount: activeUsers.length,
           currentUserIds,
           previousActiveUserIds: activeUserIds,
@@ -47,7 +48,7 @@ export function useUserPolling(
         // Always sync participants
         activeUsers.forEach((user) => {
           if (user.id && !participants.get(user.id)) {
-            console.log(`➕ Adding user:`, {
+            debug.log(`➕ Adding user:`, {
               userId: user.id,
               userName: user.name,
             });
@@ -73,7 +74,7 @@ export function useUserPolling(
           usersLeft.length > 0 ||
           JSON.stringify(currentUserIds) !== JSON.stringify(activeUserIds)
         ) {
-          console.log(`🔄 Poll #${globalPollingCount} - Users changed:`, {
+          debug.log(`🔄 Poll #${globalPollingCount} - Users changed:`, {
             joined: usersJoined,
             left: usersLeft,
           });
@@ -83,7 +84,7 @@ export function useUserPolling(
             const participant = participants.get(leftUserId);
             const hasVoted = false; // We don't have access to votes here, but this is handled in main component
             if (participant && !hasVoted) {
-              console.log(`➖ Removing user:`, leftUserId);
+              debug.log(`➖ Removing user:`, leftUserId);
               participants.delete(leftUserId);
             }
           });
@@ -93,7 +94,7 @@ export function useUserPolling(
         }
 
         // Schedule next poll cycle using waitForTask + timeout + re-render
-        console.log(`⏰ Scheduling next poll cycle in 2 second`);
+        debug.log(`⏰ Scheduling next poll cycle in 2 second`);
 
         let promiseResolve: () => void;
 
@@ -105,23 +106,23 @@ export function useUserPolling(
 
         currentTimeout = setTimeout(() => {
           if (sessionStatus === "voting") {
-            console.log(`🔄 Timeout fired - triggering re-render`);
+            debug.log(`🔄 Timeout fired - triggering re-render`);
             setPollingTrigger((prev) => prev + 1); // This triggers useEffect -> new poll cycle
           }
           promiseResolve();
         }, 2000);
       } catch (error) {
-        console.error(`❌ Poll #${globalPollingCount} error:`, error);
+        debug.error(`❌ Poll #${globalPollingCount} error:`, error);
       }
     } else {
       // Reset when not in voting mode
       if (currentTimeout) {
-        console.log("🛑 Clearing timeout (not in voting mode)");
+        debug.log("🛑 Clearing timeout (not in voting mode)");
         clearTimeout(currentTimeout);
         currentTimeout = null;
       }
       if (globalPollingCount > 0) {
-        console.log("🛑 Resetting polling state");
+        debug.log("🛑 Resetting polling state");
         globalPollingCount = 0;
       }
     }
