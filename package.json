@@ -8,10 +8,10 @@
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
     "tsc": "tsc --noEmit -p widget-src",
     "watch": "npm run build -- --watch",
-    "test": "vitest",
+    "test": "vitest run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "ci": "npm run tsc && npm run lint && npm run test && npm run build"
   },
   "author": "",
