@@ -7,7 +7,7 @@ import { CardData } from "../../utils/types";
 export interface CardGridProps {
   cards: CardData[];
   selectedValue?: number;
-  onCardClick: (value: number) => void;
+  onCardClick: (value: number | undefined) => void;
   disabled?: boolean;
 }
 
@@ -59,7 +59,12 @@ export function CardGrid(props: CardGridProps) {
             assetPath={card.assetPath}
             onClick={() => {
               if (!props.disabled) {
-                props.onCardClick(card.value as number);
+                // Clear selection if clicking the same card, otherwise select it
+                if (props.selectedValue === card.value) {
+                  props.onCardClick(undefined);
+                } else {
+                  props.onCardClick(card.value as number);
+                }
               }
             }}
           />

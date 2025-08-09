@@ -8,7 +8,7 @@ export interface VotingInterfaceProps {
   fibonacciCards: CardData[];
   jokerCards: CardData[];
   selectedValue?: number | string;
-  onCardClick: (value: number | string) => void;
+  onCardClick: (value: number | string | undefined) => void;
   disabled?: boolean;
 }
 

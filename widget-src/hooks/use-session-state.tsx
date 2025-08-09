@@ -55,8 +55,8 @@ export function useSessionState(
   const revealResults = () => {
     try {
       // Only facilitator can reveal results
-      const userId = figma.currentUser?.id || sessionState.facilitatorId;
-      if (userId === sessionState.facilitatorId) {
+      const userId = figma.currentUser?.id;
+      if (userId && userId === sessionState.facilitatorId) {
         console.log("Revealing results");
 
         // Capture snapshot of current participants
@@ -110,8 +110,8 @@ export function useSessionState(
   const resetSession = () => {
     try {
       // Only facilitator can reset
-      const userId = figma.currentUser?.id || sessionState.facilitatorId;
-      if (userId === sessionState.facilitatorId) {
+      const userId = figma.currentUser?.id;
+      if (userId && userId === sessionState.facilitatorId) {
         console.log("Resetting session");
         // Clear all votes
         for (const key of votes.keys()) {

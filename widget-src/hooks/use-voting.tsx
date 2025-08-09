@@ -3,7 +3,7 @@ import { groupVotesByValue } from "../utils/vote-utils";
 
 export interface UseVotingReturn {
   votes: SyncedMapLike<Vote>;
-  handleVote: (value: number | string) => void;
+  handleVote: (value: number | string | undefined) => void;
   groupedResults: VoteResult[];
   currentUserVote?: Vote;
 }
@@ -14,20 +14,39 @@ export function useVoting(
   count: number,
   setCount: (count: number) => void,
 ): UseVotingReturn {
-  const handleVote = (value: number | string) => {
+  // Early return if currentUserId is falsy (during initial loading state)
+  if (!currentUserId) {
+    console.log("useVoting: currentUserId is falsy, returning noop");
+    return {
+      votes,
+      handleVote: () => {}, // noop function
+      groupedResults: [],
+      currentUserVote: undefined,
+    };
+  }
+
+  const handleVote = (value: number | string | undefined) => {
     try {
-      // Use consistent user ID - prefer currentUserId parameter, fallback to figma.currentUser?.id
-      const userId = currentUserId || figma.currentUser?.id || `voter-${Date.now()}`;
+      // Only use the currentUserId argument - no fallback
+      const userId = currentUserId;
       const userName = figma.currentUser?.name || "Anonymous";
 
-      console.log("Storing vote:", { userId, userName, value, currentUserId });
+      console.log("Handling vote:", { userId, userName, value, currentUserId });
 
-      votes.set(userId, {
-        userId,
-        userName,
-        value,
-        timestamp: Date.now(),
-      });
+      if (value === undefined) {
+        // Clear the vote by removing it from the map
+        console.log("Clearing vote for user:", userId);
+        votes.delete(userId);
+      } else {
+        // Set the vote
+        console.log("Storing vote:", { userId, userName, value });
+        votes.set(userId, {
+          userId,
+          userName,
+          value,
+          timestamp: Date.now(),
+        });
+      }
 
       setCount(count + 1);
     } catch (error) {
@@ -39,7 +58,8 @@ export function useVoting(
 
   const groupedResults = groupVotesByValue(votes);
 
-  const currentUserVote = currentUserId ? votes.get(currentUserId) : undefined;
+  // currentUserVote relies solely on currentUserId
+  const currentUserVote = votes.get(currentUserId);
 
   return {
     votes,

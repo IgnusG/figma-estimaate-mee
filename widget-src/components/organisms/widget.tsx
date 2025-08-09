@@ -50,6 +50,34 @@ export function Widget() {
     }
   });
 
+  // Ensure current user is always in participant map after myUserId is set
+  useEffect(() => {
+    if (myUserId && sessionStateData.status !== "waiting") {
+      // Check if current user is in participant map
+      const currentParticipant = participants.get(myUserId);
+      if (!currentParticipant) {
+        // Register current user as participant
+        const userName = figma.currentUser?.name || "Anonymous";
+        console.log("Registering current user in participant map:", { myUserId, userName });
+        
+        participants.set(myUserId, {
+          userId: myUserId,
+          userName: userName,
+          isSpectator: false,
+          joinedAt: Date.now(),
+        });
+
+        // Also ensure they're in the session participants list
+        if (!sessionStateData.participants.includes(myUserId)) {
+          setSessionStateData({
+            ...sessionStateData,
+            participants: [...sessionStateData.participants, myUserId],
+          });
+        }
+      }
+    }
+  });
+
   // Use polling hook to manage active users
   useUserPolling(
     sessionStateData.status,
@@ -90,13 +118,35 @@ export function Widget() {
     votes,
   );
 
-  // Check if current user needs to join
-  const currentUserId = myUserId || sessionStateData.facilitatorId;
+  // Use myUserId directly without any fallback
+  const currentUserId = myUserId;
   
   const votingControls = useVoting(votes, currentUserId, count, setCount);
   const currentParticipant = currentUserId
     ? participants.get(currentUserId)
     : null;
+
+  // Loading state - wait for user ID to be available
+  if (!myUserId) {
+    return (
+      <AutoLayout
+        direction="vertical"
+        horizontalAlignItems="center"
+        verticalAlignItems="center"
+        spacing={8}
+        padding={24}
+        fill="#FFFFFF"
+        cornerRadius={12}
+        stroke="#E6E6E6"
+        width={200}
+        height={100}
+      >
+        <Text fontSize={14} fill="#666666">
+          Loading...
+        </Text>
+      </AutoLayout>
+    );
+  }
 
   // Render different views based on session state
   if (sessionStateData.status === "waiting") {

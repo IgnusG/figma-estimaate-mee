@@ -10,7 +10,7 @@ export interface UnifiedCardGridProps {
   fibonacciCards: CardData[];
   jokerCards: CardData[];
   selectedValue?: number | string;
-  onCardClick: (value: number | string) => void;
+  onCardClick: (value: number | string | undefined) => void;
   disabled?: boolean;
 }
 
@@ -56,7 +56,12 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
               assetPath={card.assetPath}
               onClick={() => {
                 if (!props.disabled) {
-                  props.onCardClick(card.value as number);
+                  // Clear selection if clicking the same card, otherwise select it
+                  if (props.selectedValue === card.value) {
+                    props.onCardClick(undefined);
+                  } else {
+                    props.onCardClick(card.value as number);
+                  }
                 }
               }}
             />
@@ -96,7 +101,12 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
               assetPath={card.assetPath}
               onClick={() => {
                 if (!props.disabled) {
-                  props.onCardClick(card.value as string);
+                  // Clear selection if clicking the same card, otherwise select it
+                  if (props.selectedValue === card.value) {
+                    props.onCardClick(undefined);
+                  } else {
+                    props.onCardClick(card.value as string);
+                  }
                 }
               }}
             />
