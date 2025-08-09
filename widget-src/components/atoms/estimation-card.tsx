@@ -1,5 +1,5 @@
 const { widget } = figma;
-const { AutoLayout, Text, Image } = widget;
+const { AutoLayout, Text, Image, Frame } = widget;
 
 export interface EstimationCardProps {
   value: number;
@@ -49,11 +49,8 @@ export function EstimationCard(props: EstimationCardProps) {
 
     return (
       <AutoLayout {...layoutProps}>
-        {/* Container for scaled image to center it */}
-        <AutoLayout
-          direction="vertical"
-          horizontalAlignItems="center"
-          verticalAlignItems="center"
+        {/* Container for scaled image to center it - using Frame for layering */}
+        <Frame
           width={scaledWidth}
           height={scaledHeight}
           cornerRadius={Math.round(12 * scale)}
@@ -83,7 +80,29 @@ export function EstimationCard(props: EstimationCardProps) {
             width={scaledWidth}
             height={scaledHeight}
           />
-        </AutoLayout>
+          {props.isSelected && (
+            <AutoLayout
+              x={0}
+              y={0}
+              width={scaledWidth}
+              height={scaledHeight}
+              horizontalAlignItems="center"
+              verticalAlignItems="center"
+              fill="00000055"
+              padding={Math.round(8 * scale)}
+            >
+              <Text
+                fontSize={Math.round(14 * scale)}
+                fill="#FFFFFF"
+                fontWeight="bold"
+                horizontalAlignText="center"
+                width="fill-parent"
+              >
+                {props.title}
+              </Text>
+            </AutoLayout>
+          )}
+        </Frame>
 
         {/* Optional overlay for title on hover - could be implemented later */}
       </AutoLayout>
