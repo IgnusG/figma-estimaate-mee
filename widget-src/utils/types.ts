@@ -33,7 +33,6 @@ export type SessionStatus = "waiting" | "voting" | "revealed";
 export interface CardData {
   value: number | string;
   title: string;
-  emoji: string;
   tooltip: string;
   assetPath: string;
 }

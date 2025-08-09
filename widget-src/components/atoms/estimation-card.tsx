@@ -4,7 +4,6 @@ const { AutoLayout, Text, Image } = widget;
 export interface EstimationCardProps {
   value: number;
   title: string;
-  emoji: string;
   tooltip: string;
   isSelected: boolean;
   onClick: () => void;

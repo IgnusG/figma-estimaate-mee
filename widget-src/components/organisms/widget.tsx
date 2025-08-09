@@ -238,7 +238,7 @@ export function Widget() {
             strokeWidth={1}
           >
             <Text fontSize={10} fill={debugEnabled ? "#1890FF" : "#8C8C8C"}>
-              {debugEnabled ? "🐛 Debug ON" : "🐛 Debug OFF"}
+              {debugEnabled ? "🐛 Debug on" : "Debug off"}
             </Text>
           </AutoLayout>
         </AutoLayout>

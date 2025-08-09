@@ -49,7 +49,6 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
               key={card.value}
               value={card.value as number}
               title={card.title}
-              emoji={card.emoji}
               tooltip={card.tooltip}
               isSelected={isSelected}
               cardScale={cardScale}
@@ -94,7 +93,6 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
               key={card.value}
               value={card.value as string}
               title={card.title}
-              emoji={card.emoji}
               tooltip={card.tooltip}
               isSelected={isSelected}
               cardScale={cardScale}
