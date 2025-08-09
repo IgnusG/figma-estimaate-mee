@@ -1,8 +1,7 @@
 const { widget } = figma;
 const { AutoLayout } = widget;
 
-import { FibonacciCardGrid } from "./fibonacci-card-grid";
-import { JokerCardGrid } from "./joker-card-grid";
+import { UnifiedCardGrid } from "./unified-card-grid";
 import { CardData } from "../../utils/types";
 
 export interface VotingInterfaceProps {
@@ -14,34 +13,13 @@ export interface VotingInterfaceProps {
 }
 
 export function VotingInterface(props: VotingInterfaceProps) {
-  const handleFibonacciClick = (value: number) => {
-    props.onCardClick(value);
-  };
-
-  const handleJokerClick = (value: string) => {
-    props.onCardClick(value);
-  };
-
-  const selectedFibonacci =
-    typeof props.selectedValue === "number" ? props.selectedValue : undefined;
-  const selectedJoker =
-    typeof props.selectedValue === "string" ? props.selectedValue : undefined;
-
   return (
-    <AutoLayout direction="vertical" spacing={24} horizontalAlignItems="center">
-      <FibonacciCardGrid
-        cards={props.fibonacciCards}
-        selectedValue={selectedFibonacci}
-        onCardClick={handleFibonacciClick}
-        disabled={props.disabled}
-      />
-
-      <JokerCardGrid
-        cards={props.jokerCards}
-        selectedValue={selectedJoker}
-        onCardClick={handleJokerClick}
-        disabled={props.disabled}
-      />
-    </AutoLayout>
+    <UnifiedCardGrid
+      fibonacciCards={props.fibonacciCards}
+      jokerCards={props.jokerCards}
+      selectedValue={props.selectedValue}
+      onCardClick={props.onCardClick}
+      disabled={props.disabled}
+    />
   );
 }
