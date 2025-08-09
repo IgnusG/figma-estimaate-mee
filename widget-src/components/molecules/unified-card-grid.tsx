@@ -31,7 +31,7 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
     return (
       <AutoLayout
         direction="horizontal"
-        spacing={4}
+        spacing={-28}
         horizontalAlignItems="center"
         padding={{ horizontal: 0, vertical: 0 }}
       >
@@ -71,7 +71,7 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
     return (
       <AutoLayout
         direction="horizontal"
-        spacing={-16}
+        spacing={-28}
         horizontalAlignItems="center"
         padding={{ horizontal: 0, vertical: 0 }}
       >
@@ -107,7 +107,7 @@ export function UnifiedCardGrid(props: UnifiedCardGridProps) {
   };
 
   return (
-    <AutoLayout direction="vertical" spacing={-8} horizontalAlignItems="center">
+    <AutoLayout direction="vertical" spacing={-24} horizontalAlignItems="center">
       {/* First fibonacci row: 4 cards */}
       {renderFibonacciRow(firstRowCards, 0)}
 

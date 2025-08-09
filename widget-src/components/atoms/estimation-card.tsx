@@ -21,8 +21,10 @@ export function EstimationCard(props: EstimationCardProps) {
 
   // Fixed container dimensions to prevent layout shifts
   const maxScale = 1.2; // Maximum scale we expect
-  const containerWidth = Math.round(baseWidth * maxScale);
-  const containerHeight = Math.round(baseHeight * maxScale);
+  // Add extra padding for shadow bounds (shadow offset + blur)
+  const shadowPadding = Math.round(8 + 24); // Max offset + max blur from enhanced shadows
+  const containerWidth = Math.round(baseWidth * maxScale) + shadowPadding;
+  const containerHeight = Math.round(baseHeight * maxScale) + shadowPadding;
 
   // Scaled content dimensions
   const scaledWidth = Math.round(baseWidth * scale);
