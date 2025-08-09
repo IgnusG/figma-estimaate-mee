@@ -79,6 +79,10 @@ export function EstimationCard(props: EstimationCardProps) {
             src={props.assetPath}
             width={scaledWidth}
             height={scaledHeight}
+            effect={props.isSelected ? {
+              type: 'layer-blur',
+              blur: 8,
+            }: undefined}
           />
           {props.isSelected && (
             <AutoLayout
@@ -88,7 +92,7 @@ export function EstimationCard(props: EstimationCardProps) {
               height={scaledHeight}
               horizontalAlignItems="center"
               verticalAlignItems="center"
-              fill="00000055"
+              fill="#00000055"
               padding={Math.round(8 * scale)}
             >
               <Text
