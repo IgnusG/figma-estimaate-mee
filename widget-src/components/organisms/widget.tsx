@@ -7,7 +7,7 @@ import { useSessionState } from "../../hooks/use-session-state";
 import { useVoting } from "../../hooks/use-voting";
 import { useUserPolling } from "../../hooks/use-user-polling";
 import { WelcomeContent } from "../molecules/welcome-content";
-import { VotingInterface } from "../molecules/voting-interface";
+import { UnifiedCardGrid } from "../molecules/unified-card-grid";
 import { ParticipantStatus } from "../molecules/participant-status";
 import { FacilitatorControls } from "../molecules/facilitator-controls";
 import { ResultsView } from "../molecules/results-view";
@@ -223,7 +223,7 @@ export function Widget() {
         <FacilitatorControls onRevealResults={sessionControls.revealResults} />
       )}
 
-      <VotingInterface
+      <UnifiedCardGrid
         fibonacciCards={FIBONACCI_CARDS}
         jokerCards={JOKER_CARDS}
         selectedValue={votingControls.currentUserVote?.value}
