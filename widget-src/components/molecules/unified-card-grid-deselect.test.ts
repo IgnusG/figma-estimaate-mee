@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { FIBONACCI_CARDS, JOKER_CARDS } from "../../utils/constants";
+import { STORY_POINT_CARDS, JOKER_CARDS } from "../../utils/constants";
 import { calculateCardScale2D, findCardPosition } from "../../utils/card-scaling";
 
 describe("UnifiedCardGrid - Deselect Behavior", () => {
@@ -192,11 +192,12 @@ describe("UnifiedCardGrid - Deselect Behavior", () => {
 
   describe("scaling behavior during deselection", () => {
     it("should reset card scale when deselected", () => {
-      const fibonacciCards = FIBONACCI_CARDS.map(c => ({ value: c.value as number }));
+      const fibonacciCards = STORY_POINT_CARDS.map(c => ({ value: c.value as number }));
       const jokerCards = JOKER_CARDS.map(c => ({ value: c.value as string }));
-      
+      const cards = [...fibonacciCards, ...jokerCards];
+
       // When card 5 is selected
-      let selectedPos = findCardPosition(5, fibonacciCards, jokerCards);
+      let selectedPos = findCardPosition(5, cards);
       let card5Scale = calculateCardScale2D({ row: 1, col: 1 }, selectedPos);
       expect(card5Scale).toBe(1.15); // Selected card gets scaled up
       
@@ -207,11 +208,12 @@ describe("UnifiedCardGrid - Deselect Behavior", () => {
     });
 
     it("should update scaling for all cards when selection changes", () => {
-      const fibonacciCards = FIBONACCI_CARDS.map(c => ({ value: c.value as number }));
+      const fibonacciCards = STORY_POINT_CARDS.map(c => ({ value: c.value as number }));
       const jokerCards = JOKER_CARDS.map(c => ({ value: c.value as string }));
-      
+      const cards = [...fibonacciCards, ...jokerCards];
+
       // Select card at position (0, 0) - value 0
-      let selectedPos = findCardPosition(0, fibonacciCards, jokerCards);
+      let selectedPos = findCardPosition(0, cards);
       
       // Check neighbor scaling
       let neighborScale = calculateCardScale2D({ row: 0, col: 1 }, selectedPos);
@@ -223,7 +225,7 @@ describe("UnifiedCardGrid - Deselect Behavior", () => {
       expect(neighborScale).toBe(1.0); // Neighbor returns to normal
       
       // Select different card at position (1, 2) - value 8
-      selectedPos = findCardPosition(8, fibonacciCards, jokerCards);
+      selectedPos = findCardPosition(8, cards);
       neighborScale = calculateCardScale2D({ row: 0, col: 1 }, selectedPos);
       expect(neighborScale).toBeLessThan(1.0); // Now scaled based on distance from new selection
     });

@@ -1,6 +1,6 @@
 import { getCardAssetURL } from "./asset-urls";
 
-export const FIBONACCI_CARDS = [
+export const STORY_POINT_CARDS = [
   {
     value: 0,
     title: "No Work",

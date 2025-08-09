@@ -1,8 +1,8 @@
 const { widget } = figma;
 const { AutoLayout, Text, Image, Frame } = widget;
 
-export interface JokerCardProps {
-  value: string;
+export interface EstimationCardProps {
+  value: number | string;
   title: string;
   tooltip: string;
   isSelected: boolean;
@@ -11,7 +11,9 @@ export interface JokerCardProps {
   assetPath?: string;
 }
 
-export function JokerCard(props: JokerCardProps) {
+export function Card(props: EstimationCardProps) {
+  const cardVariant = typeof props.value === 'string' ? 'joker' : 'story'; 
+
   const scale = props.cardScale || 1.0;
   // 2:3 aspect ratio (width:height) - Made bigger for more impact
   const baseWidth = 120;
@@ -56,12 +58,12 @@ export function JokerCard(props: JokerCardProps) {
           cornerRadius={Math.round(12 * scale)}
           overflow="hidden"
           // Move border and effects to the scaled container
-          stroke={props.isSelected ? "#FF6B35" : "#E1E8ED"}
+          stroke={props.isSelected ? (cardVariant === 'joker' ? "#FF6B35" : "#007AFF") : "#E1E8ED"}
           strokeWidth={props.isSelected ? 3 : 2}
           effect={[
             {
               type: "drop-shadow" as const,
-              color: props.isSelected ? "#FF6B3525" : "#00000015",
+              color: props.isSelected ? (cardVariant === 'joker' ? "#FF6B3525" : "#007AFF25") : "#00000015",
               offset: { x: 0, y: Math.round(4 * scale) },
               blur: Math.round(8 * scale),
               spread: 0,
@@ -82,7 +84,7 @@ export function JokerCard(props: JokerCardProps) {
             effect={props.isSelected ? {
               type: 'layer-blur',
               blur: 8,
-            } : undefined}
+            }: undefined}
           />
           {props.isSelected && (
             <AutoLayout
@@ -132,14 +134,14 @@ export function JokerCard(props: JokerCardProps) {
         padding={Math.round(8 * scale)}
         width={scaledWidth}
         height={scaledHeight}
-        fill={props.isSelected ? "#FF6B35" : "#FFF8F5"}
-        stroke={props.isSelected ? "#FF6B35" : "#E1E8ED"}
+        fill={props.isSelected ? (cardVariant === 'joker' ? "#FF6B35" : "#007AFF") : "#F8F9FA"}
+        stroke={props.isSelected ? (cardVariant === 'joker' ? "#FF6B35" : "#007AFF") : "#E1E8ED"}
         strokeWidth={props.isSelected ? 3 : 2}
         cornerRadius={Math.round(12 * scale)}
         effect={[
           {
             type: "drop-shadow" as const,
-            color: props.isSelected ? "#FF6B3525" : "#00000015",
+            color: props.isSelected ? (cardVariant === "joker" ? "#FF6B3525" : "#007AFF25") : "#00000015",
             offset: { x: 0, y: Math.round(4 * scale) },
             blur: Math.round(8 * scale),
             spread: 0,
@@ -154,8 +156,8 @@ export function JokerCard(props: JokerCardProps) {
         ]}
       >
         <Text
-          fontSize={Math.round(24 * scale)}
-          fill={props.isSelected ? "#FFFFFF" : "#FF6B35"}
+          fontSize={Math.round(28 * scale)}
+          fill={props.isSelected ? "#FFFFFF" : "#333333"}
           fontWeight="bold"
         >
           {props.value}

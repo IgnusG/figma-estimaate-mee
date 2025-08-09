@@ -14,8 +14,8 @@ class MockSyncedMap<T> {
     return this.map.get(key);
   }
   
-  keys(): IterableIterator<string> {
-    return this.map.keys();
+  keys(): string[] {
+    return Array.from(this.map.keys());
   }
   
   delete(key: string): void {

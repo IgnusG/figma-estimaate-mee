@@ -10,10 +10,11 @@ describe("Unified Card Grid - 2D Scaling Integration", () => {
     const jokerCards = [
       { value: "∞" }, { value: "?" }, { value: "🍕" }, { value: "☕" }
     ];
+    const cards = [...fibonacciCards, ...jokerCards];
 
     it("should calculate 2D scaling for fibonacci cards", () => {
       // Select card at position (0,2) - third card in first row (value: 1)
-      const selectedPos = findCardPosition(1, fibonacciCards, jokerCards);
+      const selectedPos = findCardPosition(1, cards);
       expect(selectedPos).toEqual({ row: 0, col: 2 });
 
       // Test cards in same row
@@ -29,7 +30,7 @@ describe("Unified Card Grid - 2D Scaling Integration", () => {
 
     it("should scale across fibonacci and joker cards", () => {
       // Select first joker card (row 2, col 0)
-      const selectedPos = findCardPosition("∞", fibonacciCards, jokerCards);
+      const selectedPos = findCardPosition("∞", cards);
       expect(selectedPos).toEqual({ row: 2, col: 0 });
 
       // Test fibonacci cards scaling when joker is selected
@@ -46,7 +47,7 @@ describe("Unified Card Grid - 2D Scaling Integration", () => {
 
     it("should create proper ring effects around selected card", () => {
       // Select center fibonacci card (row 1, col 1) - value: 5
-      const selectedPos = findCardPosition(5, fibonacciCards, jokerCards);
+      const selectedPos = findCardPosition(5, cards);
       expect(selectedPos).toEqual({ row: 1, col: 1 });
 
       // Ring 1 (distance 1) - direct neighbors

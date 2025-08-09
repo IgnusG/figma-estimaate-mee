@@ -4,8 +4,7 @@ import {
   calculateEuclideanDistance,
   calculateCardScale2D,
   findCardPosition,
-  createFibonacciPositions,
-  createJokerPositions
+  createPositions,
 } from "./card-scaling";
 
 describe("Card Scaling 2D System", () => {
@@ -87,12 +86,12 @@ describe("Card Scaling 2D System", () => {
 
   describe("Position mapping", () => {
     it("should create fibonacci positions correctly", () => {
-      const fibonacciCards = [
+      const cards = [
         { value: 0 }, { value: 0.5 }, { value: 1 }, { value: 2 },
         { value: 3 }, { value: 5 }, { value: 8 }, { value: 13 }
       ];
       
-      const positions = createFibonacciPositions(fibonacciCards);
+      const positions = createPositions(cards);
       
       // First row (indices 0-3)
       expect(positions[0].position).toEqual({ row: 0, col: 0 });
@@ -106,64 +105,52 @@ describe("Card Scaling 2D System", () => {
       expect(positions[6].position).toEqual({ row: 1, col: 2 });
       expect(positions[7].position).toEqual({ row: 1, col: 3 });
     });
-
-    it("should create joker positions correctly", () => {
-      const jokerCards = [
-        { value: "∞" }, { value: "?" }, { value: "🍕" }, { value: "☕" }
-      ];
-      
-      const positions = createJokerPositions(jokerCards);
-      
-      // All in row 2
-      expect(positions[0].position).toEqual({ row: 2, col: 0 });
-      expect(positions[1].position).toEqual({ row: 2, col: 1 });
-      expect(positions[2].position).toEqual({ row: 2, col: 2 });
-      expect(positions[3].position).toEqual({ row: 2, col: 3 });
-    });
   });
 
   describe("Card position finding", () => {
-    const fibonacciCards = [
+    const storyPointCards = [
       { value: 0 }, { value: 0.5 }, { value: 1 }, { value: 2 },
       { value: 3 }, { value: 5 }, { value: 8 }, { value: 13 }
     ];
     const jokerCards = [
       { value: "∞" }, { value: "?" }, { value: "🍕" }, { value: "☕" }
     ];
+    const cards = [...storyPointCards, ...jokerCards];
 
     it("should find fibonacci card positions", () => {
-      expect(findCardPosition(0, fibonacciCards, jokerCards)).toEqual({ row: 0, col: 0 });
-      expect(findCardPosition(2, fibonacciCards, jokerCards)).toEqual({ row: 0, col: 3 });
-      expect(findCardPosition(3, fibonacciCards, jokerCards)).toEqual({ row: 1, col: 0 });
-      expect(findCardPosition(13, fibonacciCards, jokerCards)).toEqual({ row: 1, col: 3 });
+      expect(findCardPosition(0, cards)).toEqual({ row: 0, col: 0 });
+      expect(findCardPosition(2, cards)).toEqual({ row: 0, col: 3 });
+      expect(findCardPosition(3, cards)).toEqual({ row: 1, col: 0 });
+      expect(findCardPosition(13, cards)).toEqual({ row: 1, col: 3 });
     });
 
     it("should find joker card positions", () => {
-      expect(findCardPosition("∞", fibonacciCards, jokerCards)).toEqual({ row: 2, col: 0 });
-      expect(findCardPosition("?", fibonacciCards, jokerCards)).toEqual({ row: 2, col: 1 });
-      expect(findCardPosition("🍕", fibonacciCards, jokerCards)).toEqual({ row: 2, col: 2 });
-      expect(findCardPosition("☕", fibonacciCards, jokerCards)).toEqual({ row: 2, col: 3 });
+      expect(findCardPosition("∞", cards)).toEqual({ row: 2, col: 0 });
+      expect(findCardPosition("?", cards)).toEqual({ row: 2, col: 1 });
+      expect(findCardPosition("🍕", cards)).toEqual({ row: 2, col: 2 });
+      expect(findCardPosition("☕", cards)).toEqual({ row: 2, col: 3 });
     });
 
     it("should return null for unknown values", () => {
-      expect(findCardPosition(999, fibonacciCards, jokerCards)).toBeNull();
-      expect(findCardPosition("unknown", fibonacciCards, jokerCards)).toBeNull();
-      expect(findCardPosition(undefined, fibonacciCards, jokerCards)).toBeNull();
+      expect(findCardPosition(999, cards)).toBeNull();
+      expect(findCardPosition("unknown", cards)).toBeNull();
+      expect(findCardPosition(undefined, cards)).toBeNull();
     });
   });
 
   describe("Cross-grid scaling scenarios", () => {
-    const fibonacciCards = [
+    const storyPointCards = [
       { value: 0 }, { value: 0.5 }, { value: 1 }, { value: 2 },
       { value: 3 }, { value: 5 }, { value: 8 }, { value: 13 }
     ];
     const jokerCards = [
       { value: "∞" }, { value: "?" }, { value: "🍕" }, { value: "☕" }
     ];
+    const cards = [...storyPointCards, ...jokerCards];
 
     it("should scale joker cards when fibonacci card is selected", () => {
       // Select first fibonacci card (0,0)
-      const selectedPos = findCardPosition(0, fibonacciCards, jokerCards);
+      const selectedPos = findCardPosition(0, cards);
       expect(selectedPos).toEqual({ row: 0, col: 0 });
 
       // Test joker card scaling
@@ -177,7 +164,7 @@ describe("Card Scaling 2D System", () => {
 
     it("should scale fibonacci cards when joker card is selected", () => {
       // Select first joker card (2,0)  
-      const selectedPos = findCardPosition("∞", fibonacciCards, jokerCards);
+      const selectedPos = findCardPosition("∞", cards);
       expect(selectedPos).toEqual({ row: 2, col: 0 });
 
       // Test fibonacci card scaling
