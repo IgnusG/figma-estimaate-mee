@@ -16,11 +16,11 @@ export function useVoting(
 ): UseVotingReturn {
   const handleVote = (value: number | string) => {
     try {
-      // Store vote in SyncedMap
-      const userId = figma.currentUser?.id || `voter-${Date.now()}`;
+      // Use consistent user ID - prefer currentUserId parameter, fallback to figma.currentUser?.id
+      const userId = currentUserId || figma.currentUser?.id || `voter-${Date.now()}`;
       const userName = figma.currentUser?.name || "Anonymous";
 
-      console.log("Storing vote:", { userId, userName, value });
+      console.log("Storing vote:", { userId, userName, value, currentUserId });
 
       votes.set(userId, {
         userId,

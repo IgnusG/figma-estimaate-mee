@@ -34,6 +34,7 @@ export function Widget() {
   const votes = useSyncedMap<Vote>("votes");
   const participants = useSyncedMap<Participant>("participants");
 
+
   // Initialize current user ID
   useEffect(() => {
     try {
@@ -81,6 +82,7 @@ export function Widget() {
     }
   });
 
+
   const sessionControls = useSessionState(
     sessionStateData,
     setSessionStateData,
@@ -88,10 +90,10 @@ export function Widget() {
     votes,
   );
 
-  const votingControls = useVoting(votes, myUserId, count, setCount);
-
   // Check if current user needs to join
   const currentUserId = myUserId || sessionStateData.facilitatorId;
+  
+  const votingControls = useVoting(votes, currentUserId, count, setCount);
   const currentParticipant = currentUserId
     ? participants.get(currentUserId)
     : null;
