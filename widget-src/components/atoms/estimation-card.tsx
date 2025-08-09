@@ -15,8 +15,8 @@ export interface EstimationCardProps {
 export function EstimationCard(props: EstimationCardProps) {
   const scale = props.cardScale || 1.0;
   // 2:3 aspect ratio (width:height) - Made bigger for more impact
-  const baseWidth = 100;
-  const baseHeight = 150; // 100 * 1.5 = 150 for 2:3 ratio
+  const baseWidth = 120;
+  const baseHeight = 180; // 120 * 1.5 = 180 for 2:3 ratio
   // const baseTitleFontSize = 11; // Unused after removing title
 
   // Fixed container dimensions to prevent layout shifts

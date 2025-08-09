@@ -70,14 +70,14 @@ describe("Card Scaling Logic", () => {
   describe("Row-based to global scaling migration", () => {
     it("should scale across rows, not just within rows", () => {
       // Test that cards in different rows affect each other's scaling
-      const firstRowCards = [{ value: 1 }, { value: 2 }, { value: 3 }, { value: 5 }, { value: 8 }];
-      const secondRowCards = [{ value: 13 }, { value: 21 }, { value: 34 }];
+      const firstRowCards = [{ value: 1 }, { value: 2 }, { value: 3 }, { value: 5 }];
+      const secondRowCards = [{ value: 8 }, { value: 13 }, { value: 21 }, { value: 34 }];
       const allCards = [...firstRowCards, ...secondRowCards];
       
-      // Select a card in the second row (index 5 in global array)
-      const selectedValue = 13;
+      // Select a card in the second row (index 4 in global array)
+      const selectedValue = 8;
       const globalSelectedIndex = allCards.findIndex(card => card.value === selectedValue);
-      expect(globalSelectedIndex).toBe(5); // First card of second row
+      expect(globalSelectedIndex).toBe(4); // First card of second row
       
       const calculateScale = (globalIndex: number, globalSelectedIndex: number) => {
         if (globalSelectedIndex === -1) return 1.0;
@@ -86,12 +86,12 @@ describe("Card Scaling Logic", () => {
         return isSelected ? 1.15 : Math.max(0.75, 1.0 - distanceFromSelected * 0.08);
       };
       
-      // Test that first row cards (0-4) are affected by second row selection (5)
-      // Distance 5: 1.0 - 5*0.08 = 0.6, but clamped to 0.75 by Math.max in the calculation
+      // Test that first row cards (0-3) are affected by second row selection (4)
+      // Distance 4: 1.0 - 4*0.08 = 0.68, but clamped to 0.75 by Math.max in the calculation
       expect(calculateScale(0, globalSelectedIndex)).toBe(0.75); // Should be clamped to minimum
-      expect(calculateScale(4, globalSelectedIndex)).toBeCloseTo(0.92); // Distance 1
-      expect(calculateScale(5, globalSelectedIndex)).toBe(1.15); // Selected card
-      expect(calculateScale(6, globalSelectedIndex)).toBeCloseTo(0.92); // Distance 1 in second row
+      expect(calculateScale(3, globalSelectedIndex)).toBeCloseTo(0.92); // Distance 1
+      expect(calculateScale(4, globalSelectedIndex)).toBe(1.15); // Selected card
+      expect(calculateScale(5, globalSelectedIndex)).toBeCloseTo(0.92); // Distance 1 in second row
     });
   });
 });
