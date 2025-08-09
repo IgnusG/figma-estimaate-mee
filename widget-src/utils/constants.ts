@@ -34,7 +34,7 @@ export const STORY_POINT_CARDS = [
   },
   {
     value: 5,
-    title: "Medium Sized",
+    title: "The everything estimate",
     tooltip: "2-3 days later and it will be just about done - maybe",
     assetPath: `${ASSET_BASE_URL}/story-points-5.jpg`,
   },
