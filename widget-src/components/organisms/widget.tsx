@@ -174,7 +174,8 @@ export function Widget() {
         showSyncIndicator,
       };
     })
-    .filter(Boolean) as Array<{
+    .filter(Boolean)
+    .sort((a, b) => a!.userName.localeCompare(b!.userName)) as Array<{
     userId: string;
     userName: string;
     hasVoted: boolean;
