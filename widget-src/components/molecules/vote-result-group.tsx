@@ -67,9 +67,9 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
         </AutoLayout>
       </AutoLayout>
       
-      {/* Participants with emojis */}
+      {/* Participants with emojis - sorted alphabetically for consistent layout */}
       <AutoLayout direction="horizontal" spacing={8} wrap>
-        {props.participants.map((participant, index) => (
+        {props.participants.sort((a, b) => a.name.localeCompare(b.name)).map((participant, index) => (
           <AutoLayout
             key={participant.userId}
             direction="horizontal"
