@@ -15,7 +15,6 @@ export interface SessionState {
 export interface Participant {
   userId: string;
   userName: string;
-  isSpectator: boolean;
   joinedAt: number;
 }
 

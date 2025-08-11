@@ -4,18 +4,17 @@ const { AutoLayout, Text } = widget;
 export interface ParticipantBadgeProps {
   userName: string;
   hasVoted: boolean;
-  isSpectator: boolean;
+  showSyncIndicator?: boolean;
 }
 
 export function ParticipantBadge(props: ParticipantBadgeProps) {
   const getBackgroundColor = () => {
     if (props.hasVoted) return "#28A745"; // Green
-    if (props.isSpectator) return "#6C757D"; // Gray
     return "#FFC107"; // Yellow for pending
   };
 
   const getDisplayText = () => {
-    if (props.isSpectator) return `${props.userName} 👁️`;
+    if (props.hasVoted && props.showSyncIndicator) return `${props.userName} ⚡`;
     if (props.hasVoted) return `${props.userName} ✓`;
     return props.userName;
   };

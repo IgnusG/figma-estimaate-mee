@@ -12,6 +12,7 @@ export function useVoting(
   votes: SyncedMapLike<Vote>,
   count: number,
   setCount: (count: number) => void,
+  addRecentVote?: (userId: string, timestamp: number) => void,
 ): UseVotingReturn {
 
   const handleVote = (currentUserId: string, value: number | string | undefined) => {
@@ -28,13 +29,19 @@ export function useVoting(
         votes.delete(userId);
       } else {
         // Set the vote
+        const timestamp = Date.now();
         debug.log("Storing vote:", { userId, userName, value });
         votes.set(userId, {
           userId,
           userName,
           value,
-          timestamp: Date.now(),
+          timestamp,
         });
+        
+        // Track recent vote for sync indicator
+        if (addRecentVote) {
+          addRecentVote(userId, timestamp);
+        }
       }
 
       setCount(count + 1);

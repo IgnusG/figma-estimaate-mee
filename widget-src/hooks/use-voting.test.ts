@@ -34,10 +34,10 @@ describe("useVoting hook", () => {
 
   describe("vote selection and deselection", () => {
     it("should set a vote when a card value is provided", () => {
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
 
       // Select a card with value 5
-      handleVote(5);
+      handleVote("user-123", 5);
 
       // Verify vote is stored
       const vote = mockVotes.get("user-123");
@@ -49,14 +49,14 @@ describe("useVoting hook", () => {
     });
 
     it("should clear vote when undefined is passed (deselect)", () => {
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
 
       // First, select a card
-      handleVote(5);
+      handleVote("user-123", 5);
       expect(mockVotes.get("user-123")).toBeDefined();
 
       // Then deselect by passing undefined
-      handleVote(undefined);
+      handleVote("user-123", undefined);
 
       // Verify vote is cleared
       expect(mockVotes.get("user-123")).toBeUndefined();
@@ -65,44 +65,44 @@ describe("useVoting hook", () => {
     });
 
     it("should allow reselection after clearing", () => {
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
 
       // Select card 5
-      handleVote(5);
+      handleVote("user-123", 5);
       expect(mockVotes.get("user-123")?.value).toBe(5);
 
       // Deselect
-      handleVote(undefined);
+      handleVote("user-123", undefined);
       expect(mockVotes.get("user-123")).toBeUndefined();
 
       // Select card 8
-      handleVote(8);
+      handleVote("user-123", 8);
       expect(mockVotes.get("user-123")?.value).toBe(8);
 
       expect(mockSetCount).toHaveBeenCalledTimes(3);
     });
 
     it("should handle string values (joker cards)", () => {
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
 
       // Select a joker card
-      handleVote("?");
+      handleVote("user-123", "?");
       expect(mockVotes.get("user-123")?.value).toBe("?");
 
       // Deselect
-      handleVote(undefined);
+      handleVote("user-123", undefined);
       expect(mockVotes.get("user-123")).toBeUndefined();
 
       // Select another joker card
-      handleVote("∞");
+      handleVote("user-123", "∞");
       expect(mockVotes.get("user-123")?.value).toBe("∞");
     });
 
     it("should update existing vote when selecting different card", () => {
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
 
       // Select card 3
-      handleVote(3);
+      handleVote("user-123", 3);
       const firstVote = mockVotes.get("user-123");
       expect(firstVote?.value).toBe(3);
       const firstTimestamp = firstVote?.timestamp;
@@ -110,7 +110,7 @@ describe("useVoting hook", () => {
       // Wait a bit to ensure timestamp changes
       setTimeout(() => {
         // Select card 5 (without deselecting first)
-        handleVote(5);
+        handleVote("user-123", 5);
         const secondVote = mockVotes.get("user-123");
         expect(secondVote?.value).toBe(5);
         expect(secondVote?.timestamp).toBeGreaterThan(firstTimestamp!);
@@ -120,7 +120,6 @@ describe("useVoting hook", () => {
     it("should return current user vote correctly", () => {
       const { handleVote, currentUserVote } = useVoting(
         mockVotes,
-        "user-123",
         0,
         mockSetCount
       );
@@ -129,10 +128,9 @@ describe("useVoting hook", () => {
       expect(currentUserVote).toBeUndefined();
 
       // After voting
-      handleVote(13);
+      handleVote("user-123", 13);
       const { currentUserVote: voteAfter } = useVoting(
         mockVotes,
-        "user-123",
         0,
         mockSetCount
       );
@@ -148,7 +146,7 @@ describe("useVoting hook", () => {
         }),
       } as SyncedMapLike<Vote>;
 
-      const { handleVote } = useVoting(errorVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(errorVotes, 0, mockSetCount);
 
       // Should not throw when delete fails
       expect(() => handleVote(undefined)).not.toThrow();
@@ -174,16 +172,16 @@ describe("useVoting hook", () => {
         timestamp: Date.now(),
       });
 
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
 
       // Add own vote
-      handleVote(5);
+      handleVote("user-123", 5);
       expect(mockVotes.get("user-123")?.value).toBe(5);
       expect(mockVotes.get("user-456")?.value).toBe(8);
       expect(mockVotes.get("user-789")?.value).toBe(3);
 
       // Clear own vote
-      handleVote(undefined);
+      handleVote("user-123", undefined);
 
       // Own vote should be cleared, others preserved
       expect(mockVotes.get("user-123")).toBeUndefined();
@@ -202,7 +200,7 @@ describe("useVoting hook", () => {
       );
 
       // Should return noop function
-      handleVote(5);
+      handleVote("user-123", 5);
       expect(mockSetCount).not.toHaveBeenCalled();
       expect(currentUserVote).toBeUndefined();
       expect(groupedResults).toEqual([]);
@@ -212,8 +210,8 @@ describe("useVoting hook", () => {
       const originalUser = global.figma.currentUser;
       global.figma.currentUser = null as any;
 
-      const { handleVote } = useVoting(mockVotes, "user-123", 0, mockSetCount);
-      handleVote(5);
+      const { handleVote } = useVoting(mockVotes, 0, mockSetCount);
+      handleVote("user-123", 5);
 
       const vote = mockVotes.get("user-123");
       expect(vote?.userName).toBe("Anonymous");

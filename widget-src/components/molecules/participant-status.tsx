@@ -11,7 +11,7 @@ export interface ParticipantStatusProps {
     userId: string;
     userName: string;
     hasVoted: boolean;
-    isSpectator: boolean;
+    showSyncIndicator?: boolean;
   }>;
 }
 
@@ -33,7 +33,7 @@ export function ParticipantStatus(props: ParticipantStatusProps) {
             key={participant.userId}
             userName={participant.userName}
             hasVoted={participant.hasVoted}
-            isSpectator={participant.isSpectator}
+            showSyncIndicator={participant.showSyncIndicator}
           />
         ))}
       </AutoLayout>

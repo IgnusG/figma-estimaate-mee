@@ -32,6 +32,10 @@ export function Widget() {
     "pollingTrigger",
     0,
   );
+  const [recentVotes, setRecentVotes] = useSyncedState<Record<string, number>>(
+    "recentVotes",
+    {},
+  );
   const votes = useSyncedMap<Vote>("votes");
   const participants = useSyncedMap<Participant>("participants");
 
@@ -58,7 +62,6 @@ export function Widget() {
         participants.set(figma.currentUser.id, {
           userId: figma.currentUser.id,
           userName: userName,
-          isSpectator: false,
           joinedAt: Date.now(),
         });
 
@@ -113,7 +116,30 @@ export function Widget() {
     votes,
   );
 
-  const votingControls = useVoting(votes, count, setCount);
+  // Custom function to add recent votes
+  const addRecentVote = (userId: string, timestamp: number) => {
+    setRecentVotes({ ...recentVotes, [userId]: timestamp });
+  };
+  
+  const votingControls = useVoting(votes, count, setCount, addRecentVote);
+
+  // Clear recent votes after 1 second
+  useEffect(() => {
+    const currentTime = Date.now();
+    const updatedRecentVotes = { ...recentVotes };
+    let hasChanges = false;
+
+    Object.keys(updatedRecentVotes).forEach(userId => {
+      if (currentTime - updatedRecentVotes[userId] > 1000) {
+        delete updatedRecentVotes[userId];
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      setRecentVotes(updatedRecentVotes);
+    }
+  }, [recentVotes]);
 
   // Render different views based on session state
   if (sessionStateData.status === "waiting") {
@@ -131,36 +157,28 @@ export function Widget() {
     );
   }
 
-  // Main voting interface
-  const eligibleVoters = activeUserIds.filter((id) => {
-    const participant = participants.get(id);
-    return !participant?.isSpectator;
-  });
-  const totalEligibleVoters =
-    eligibleVoters.length > 0
-      ? eligibleVoters.length
-      : sessionStateData.participants.filter(
-          (id) => !participants.get(id)?.isSpectator,
-        ).length;
+  // Main voting interface - all participants are voters
+  const totalEligibleVoters = activeUserIds.length > 0 ? activeUserIds.length : sessionStateData.participants.length;
 
   const participantStatusData = activeUserIds
     .map((userId) => {
       const participant = participants.get(userId);
       const hasVoted = votes.get(userId) !== undefined;
+      const showSyncIndicator = recentVotes[userId] !== undefined;
       if (!participant) return null;
 
       return {
         userId,
         userName: participant.userName,
         hasVoted,
-        isSpectator: participant.isSpectator,
+        showSyncIndicator,
       };
     })
     .filter(Boolean) as Array<{
     userId: string;
     userName: string;
     hasVoted: boolean;
-    isSpectator: boolean;
+    showSyncIndicator: boolean;
   }>;
 
   return (
