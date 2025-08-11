@@ -24,7 +24,6 @@ export function Widget() {
       participants: [],
     },
   );
-  const [myUserId, setMyUserId] = useSyncedState<string>("myUserId", "");
   const [activeUserIds, setActiveUserIds] = useSyncedState<string[]>(
     "activeUserIds",
     [],
@@ -46,43 +45,28 @@ export function Widget() {
     }
   });
 
-  // Initialize current user ID
-  useEffect(() => {
-    try {
-      const userId = figma.currentUser?.id;
-      const userName = figma.currentUser?.name || "Anonymous";
-
-      if (userId && userId !== myUserId) {
-        debug.log("Setting current user ID:", { userId, userName });
-        setMyUserId(userId);
-      }
-    } catch (error) {
-      debug.error("Error initializing user:", error);
-    }
-  });
-
   // Ensure current user is always in participant map after myUserId is set
   useEffect(() => {
-    if (myUserId && sessionStateData.status !== "waiting") {
+    if (figma.currentUser?.id && sessionStateData.status !== "waiting") {
       // Check if current user is in participant map
-      const currentParticipant = participants.get(myUserId);
+      const currentParticipant = participants.get(figma.currentUser.id);
       if (!currentParticipant) {
         // Register current user as participant
         const userName = figma.currentUser?.name || "Anonymous";
-        debug.log("Registering current user in participant map:", { myUserId, userName });
+        debug.log("Registering current user in participant map:", { id: figma.currentUser.id, userName });
         
-        participants.set(myUserId, {
-          userId: myUserId,
+        participants.set(figma.currentUser.id, {
+          userId: figma.currentUser.id,
           userName: userName,
           isSpectator: false,
           joinedAt: Date.now(),
         });
 
         // Also ensure they're in the session participants list
-        if (!sessionStateData.participants.includes(myUserId)) {
+        if (!sessionStateData.participants.includes(figma.currentUser.id)) {
           setSessionStateData({
             ...sessionStateData,
-            participants: [...sessionStateData.participants, myUserId],
+            participants: [...sessionStateData.participants, figma.currentUser.id],
           });
         }
       }
@@ -129,35 +113,7 @@ export function Widget() {
     votes,
   );
 
-  // Use myUserId directly without any fallback
-  const currentUserId = myUserId;
-  
-  const votingControls = useVoting(votes, currentUserId, count, setCount);
-  const currentParticipant = currentUserId
-    ? participants.get(currentUserId)
-    : null;
-
-  // Loading state - wait for user ID to be available
-  if (!myUserId) {
-    return (
-      <AutoLayout
-        direction="vertical"
-        horizontalAlignItems="center"
-        verticalAlignItems="center"
-        spacing={8}
-        padding={24}
-        fill="#FFFFFF"
-        cornerRadius={12}
-        stroke="#E6E6E6"
-        width={200}
-        height={100}
-      >
-        <Text fontSize={14} fill="#666666">
-          Loading...
-        </Text>
-      </AutoLayout>
-    );
-  }
+  const votingControls = useVoting(votes, count, setCount);
 
   // Render different views based on session state
   if (sessionStateData.status === "waiting") {
@@ -176,8 +132,6 @@ export function Widget() {
   }
 
   // Main voting interface
-  // Use pollingTrigger to ensure fresh renders for participant counts
-  const _trigger = pollingTrigger;
   const eligibleVoters = activeUserIds.filter((id) => {
     const participant = participants.get(id);
     return !participant?.isSpectator;
@@ -251,19 +205,14 @@ export function Widget() {
       />
 
       {/* Facilitator Controls */}
-      {currentUserId === sessionStateData.facilitatorId && (
-        <FacilitatorControls onRevealResults={sessionControls.revealResults} />
-      )}
-
+      <FacilitatorControls onRevealResults={sessionControls.revealResults} />
+      
       <CardGrid
         cards={[...STORY_POINT_CARDS, ...JOKER_CARDS]}
-        selectedValue={votingControls.currentUserVote?.value}
         onCardClick={(value) => {
-          if (currentParticipant && !currentParticipant.isSpectator) {
-            votingControls.handleVote(value);
-          }
+          if (!figma.currentUser?.id) return;
+          votingControls.handleVote(figma.currentUser.id, value);
         }}
-        disabled={currentParticipant?.isSpectator}
       />
     </AutoLayout>
   );
