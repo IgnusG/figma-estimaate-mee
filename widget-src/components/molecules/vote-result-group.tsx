@@ -31,49 +31,32 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
       padding={20}
       fill={style.fill}
       cornerRadius={12}
-      width="fill-parent"
+      width="hug-contents"
       stroke={style.accent}
       strokeWidth={2}
-      overflow="visible"
     >
       <AutoLayout
         direction="horizontal"
         spacing={16}
         horizontalAlignItems="center"
         width="hug-contents"
-        overflow="visible"
       >
-        <AutoLayout
-          direction="vertical"
-          spacing={8}
-          width="fill-parent"
-          overflow="visible"
-        >
+        <AutoLayout direction="vertical" spacing={8} width="hug-contents">
           <AutoLayout
             direction="horizontal"
-            spacing={16}
+            spacing={20}
             horizontalAlignItems="center"
             width="hug-contents"
-            overflow="visible"
           >
-            <AutoLayout
-              direction="horizontal"
-              horizontalAlignItems="center"
-              verticalAlignItems="center"
-              width="hug-contents"
-            >
-              <Text fontSize={28} fontWeight="bold" fill={style.accent}>
-                {props.value}
-              </Text>
-            </AutoLayout>
+            <Text fontSize={28} fontWeight="bold" fill={style.accent}>
+              {props.value}
+            </Text>
             <AutoLayout
               padding={{ horizontal: 12, vertical: 6 }}
               fill={style.accent}
               cornerRadius={12}
               horizontalAlignItems="center"
               verticalAlignItems="center"
-              width="hug-contents"
-              height="hug-contents"
             >
               <Text fontSize={12} fontWeight="bold" fill="#FFFFFF">
                 {props.count} vote{props.count !== 1 ? "s" : ""}
