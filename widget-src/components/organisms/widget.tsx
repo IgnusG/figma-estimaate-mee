@@ -168,7 +168,6 @@ export function Widget() {
         votes={votes}
         showPokerResults={showPokerResults}
         onRevealCards={handleRevealCards}
-        onReplaceRandomCard={sessionControls.replaceRandomCard}
       />
     );
   }
@@ -222,7 +221,19 @@ export function Widget() {
         <Text fontSize={18} fontWeight="bold">
           Choose your estimate
         </Text>
-        <AutoLayout horizontalAlignItems="end" width="fill-parent">
+        <AutoLayout horizontalAlignItems="end" width="fill-parent" spacing={8}>
+          <AutoLayout
+            onClick={sessionControls.replaceRandomCard}
+            padding={4}
+            cornerRadius={4}
+            fill="#FFF3E0"
+            stroke="#FFB74D"
+            strokeWidth={1}
+          >
+            <Text fontSize={10} fill="#E65100">
+              🎴 Replace Card
+            </Text>
+          </AutoLayout>
           <AutoLayout
             onClick={() => setDebugEnabled(!debugEnabled)}
             padding={4}

@@ -24,7 +24,6 @@ export interface ResultsViewProps {
   votes: SyncedMapLike<Vote>;
   showPokerResults?: boolean;
   onRevealCards?: () => void;
-  onReplaceRandomCard?: () => void;
 }
 
 export function ResultsView(props: ResultsViewProps) {
