@@ -4,7 +4,10 @@ import { debug } from "../utils/debug";
 
 export interface UseVotingReturn {
   votes: SyncedMapLike<Vote>;
-  handleVote: (currentUserId: string, value: number | string | undefined) => void;
+  handleVote: (
+    currentUserId: string,
+    value: number | string | undefined,
+  ) => void;
   groupedResults: VoteResult[];
 }
 
@@ -14,8 +17,10 @@ export function useVoting(
   setCount: (count: number) => void,
   addRecentVote?: (userId: string, timestamp: number) => void,
 ): UseVotingReturn {
-
-  const handleVote = (currentUserId: string, value: number | string | undefined) => {
+  const handleVote = (
+    currentUserId: string,
+    value: number | string | undefined,
+  ) => {
     try {
       // Validate currentUserId
       if (!currentUserId || currentUserId.trim() === "") {
@@ -43,7 +48,7 @@ export function useVoting(
           value,
           timestamp,
         });
-        
+
         // Track recent vote for sync indicator
         if (addRecentVote) {
           addRecentVote(userId, timestamp);

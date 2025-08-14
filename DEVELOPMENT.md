@@ -204,6 +204,7 @@ The widget uses custom JSX configuration for Figma:
    - Automatic unused variable detection
 
 2. **Type Checking**
+
    ```bash
    npm run tsc
    ```

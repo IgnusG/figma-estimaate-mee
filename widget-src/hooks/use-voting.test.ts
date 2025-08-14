@@ -26,7 +26,9 @@ describe("useVoting hook", () => {
       keys: () => Array.from(votesData.keys()),
       values: () => Array.from(votesData.values()),
       entries: () => Array.from(votesData.entries()),
-      get size() { return votesData.size; },
+      get size() {
+        return votesData.size;
+      },
     } as SyncedMapLike<Vote>;
 
     mockSetCount = vi.fn();
@@ -121,7 +123,7 @@ describe("useVoting hook", () => {
       const { handleVote, currentUserVote } = useVoting(
         mockVotes,
         0,
-        mockSetCount
+        mockSetCount,
       );
 
       // Initially no vote
@@ -191,7 +193,7 @@ describe("useVoting hook", () => {
       const { handleVote, currentUserVote, groupedResults } = useVoting(
         mockVotes,
         0,
-        mockSetCount
+        mockSetCount,
       );
 
       // Should return noop function when userId is empty

@@ -42,7 +42,6 @@ export function Widget() {
   const votes = useSyncedMap<Vote>("votes");
   const participants = useSyncedMap<Participant>("participants");
 
-
   // Sync debug state
   useEffect(() => {
     if (debugEnabled) {
@@ -60,8 +59,11 @@ export function Widget() {
       if (!currentParticipant) {
         // Register current user as participant
         const userName = figma.currentUser?.name || "Anonymous";
-        debug.log("Registering current user in participant map:", { id: figma.currentUser.id, userName });
-        
+        debug.log("Registering current user in participant map:", {
+          id: figma.currentUser.id,
+          userName,
+        });
+
         participants.set(figma.currentUser.id, {
           userId: figma.currentUser.id,
           userName: userName,
@@ -72,7 +74,10 @@ export function Widget() {
         if (!sessionStateData.participants.includes(figma.currentUser.id)) {
           setSessionStateData({
             ...sessionStateData,
-            participants: [...sessionStateData.participants, figma.currentUser.id],
+            participants: [
+              ...sessionStateData.participants,
+              figma.currentUser.id,
+            ],
           });
         }
       }
@@ -111,7 +116,6 @@ export function Widget() {
     }
   });
 
-
   const sessionControls = useSessionState(
     sessionStateData,
     setSessionStateData,
@@ -124,7 +128,7 @@ export function Widget() {
   const addRecentVote = (userId: string, timestamp: number) => {
     setRecentVotes({ ...recentVotes, [userId]: timestamp });
   };
-  
+
   const votingControls = useVoting(votes, count, setCount, addRecentVote);
 
   // Reveal cards handler
@@ -138,7 +142,7 @@ export function Widget() {
     const updatedRecentVotes = { ...recentVotes };
     let hasChanges = false;
 
-    Object.keys(updatedRecentVotes).forEach(userId => {
+    Object.keys(updatedRecentVotes).forEach((userId) => {
       if (currentTime - updatedRecentVotes[userId] > 1000) {
         delete updatedRecentVotes[userId];
         hasChanges = true;
@@ -169,7 +173,10 @@ export function Widget() {
   }
 
   // Main voting interface - all participants are voters
-  const totalEligibleVoters = activeUserIds.length > 0 ? activeUserIds.length : sessionStateData.participants.length;
+  const totalEligibleVoters =
+    activeUserIds.length > 0
+      ? activeUserIds.length
+      : sessionStateData.participants.length;
 
   const participantStatusData = activeUserIds
     .map((userId) => {
@@ -238,7 +245,7 @@ export function Widget() {
 
       {/* Session Controls */}
       <SessionControls onRevealResults={sessionControls.revealResults} />
-      
+
       <CardGrid
         cards={[...STORY_POINT_CARDS, ...JOKER_CARDS]}
         onCardClick={(value) => {

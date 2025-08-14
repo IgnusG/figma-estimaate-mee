@@ -61,16 +61,18 @@ export function useSessionState(
         // Distribute cards to participants who voted first
         const voterIds = votes.keys();
         debug.log("Distributing cards to voters:", voterIds);
-        
+
         for (const voterId of voterIds) {
           const participant = participants.get(voterId);
           if (participant) {
             const updatedCards = addCardToParticipant(participant.cards);
             participants.set(voterId, {
               ...participant,
-              cards: updatedCards
+              cards: updatedCards,
             });
-            debug.log(`Added card to ${participant.userName}, now has ${updatedCards.length} cards`);
+            debug.log(
+              `Added card to ${participant.userName}, now has ${updatedCards.length} cards`,
+            );
           }
         }
 
@@ -137,7 +139,7 @@ export function useSessionState(
           status: "voting",
           participantsSnapshot: undefined, // Clear the snapshot for new session
         });
-        
+
         // Reset poker results
         if (setShowPokerResults) {
           setShowPokerResults(false);

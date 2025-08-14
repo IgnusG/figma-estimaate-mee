@@ -25,10 +25,10 @@ describe("Card Utils", () => {
       const ranks: Rank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"];
 
       // Check all combinations exist
-      suits.forEach(suit => {
-        ranks.forEach(rank => {
-          const cardExists = deck.some(card => 
-            card.suit === suit && card.rank === rank
+      suits.forEach((suit) => {
+        ranks.forEach((rank) => {
+          const cardExists = deck.some(
+            (card) => card.suit === suit && card.rank === rank,
           );
           expect(cardExists).toBe(true);
         });
@@ -37,7 +37,7 @@ describe("Card Utils", () => {
 
     it("should have unique card IDs", () => {
       const deck = createDeck();
-      const ids = deck.map(card => card.id);
+      const ids = deck.map((card) => card.id);
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(52);
     });
@@ -53,12 +53,13 @@ describe("Card Utils", () => {
     it("should contain all original cards", () => {
       const originalDeck = createDeck();
       const shuffled = shuffleDeck(originalDeck);
-      
-      originalDeck.forEach(originalCard => {
-        const cardExists = shuffled.some(card => 
-          card.id === originalCard.id &&
-          card.suit === originalCard.suit &&
-          card.rank === originalCard.rank
+
+      originalDeck.forEach((originalCard) => {
+        const cardExists = shuffled.some(
+          (card) =>
+            card.id === originalCard.id &&
+            card.suit === originalCard.suit &&
+            card.rank === originalCard.rank,
         );
         expect(cardExists).toBe(true);
       });
@@ -82,7 +83,7 @@ describe("Card Utils", () => {
 
     it("should return different cards on multiple calls", () => {
       const cards = Array.from({ length: 10 }, () => drawRandomCard());
-      const uniqueCards = new Set(cards.map(c => c.id));
+      const uniqueCards = new Set(cards.map((c) => c.id));
       // Should have some variety (not all identical)
       expect(uniqueCards.size).toBeGreaterThan(1);
     });
@@ -99,7 +100,7 @@ describe("Card Utils", () => {
     it("should add card to existing collection under 5", () => {
       const existingCards: PlayingCard[] = [
         { suit: "hearts", rank: 2, id: "2-hearts" },
-        { suit: "clubs", rank: "A", id: "A-clubs" }
+        { suit: "clubs", rank: "A", id: "A-clubs" },
       ];
       const result = addCardToParticipant(existingCards);
       expect(result).toHaveLength(3);
@@ -113,7 +114,7 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "A", id: "A-clubs" },
         { suit: "diamonds", rank: "K", id: "K-diamonds" },
         { suit: "spades", rank: 7, id: "7-spades" },
-        { suit: "hearts", rank: "Q", id: "Q-hearts" }
+        { suit: "hearts", rank: "Q", id: "Q-hearts" },
       ];
       const result = addCardToParticipant(existingCards);
       expect(result).toHaveLength(5);
@@ -125,17 +126,17 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "A", id: "A-clubs" },
         { suit: "diamonds", rank: "K", id: "K-diamonds" },
         { suit: "spades", rank: 7, id: "7-spades" },
-        { suit: "hearts", rank: "Q", id: "Q-hearts" }
+        { suit: "hearts", rank: "Q", id: "Q-hearts" },
       ];
       const result = addCardToParticipant(existingCards);
-      
+
       // Should have exactly 5 cards
       expect(result).toHaveLength(5);
-      
+
       // Should contain a new card (not all original cards)
-      const originalIds = existingCards.map(c => c.id);
-      const resultIds = result.map(c => c.id);
-      const hasNewCard = resultIds.some(id => !originalIds.includes(id));
+      const originalIds = existingCards.map((c) => c.id);
+      const resultIds = result.map((c) => c.id);
+      const hasNewCard = resultIds.some((id) => !originalIds.includes(id));
       expect(hasNewCard).toBe(true);
     });
   });
@@ -146,9 +147,9 @@ describe("Card Utils", () => {
         { suit: "hearts", rank: "A", id: "A-hearts" },
         { suit: "clubs", rank: 2, id: "2-clubs" },
         { suit: "diamonds", rank: "K", id: "K-diamonds" },
-        { suit: "spades", rank: 7, id: "7-spades" }
+        { suit: "spades", rank: 7, id: "7-spades" },
       ];
-      
+
       const sorted = sortCards(cards);
       expect(sorted[0].rank).toBe(2);
       expect(sorted[1].rank).toBe(7);
@@ -161,9 +162,9 @@ describe("Card Utils", () => {
         { suit: "spades", rank: 5, id: "5-spades" },
         { suit: "clubs", rank: 5, id: "5-clubs" },
         { suit: "hearts", rank: 5, id: "5-hearts" },
-        { suit: "diamonds", rank: 5, id: "5-diamonds" }
+        { suit: "diamonds", rank: 5, id: "5-diamonds" },
       ];
-      
+
       const sorted = sortCards(cards);
       expect(sorted[0].suit).toBe("clubs");
       expect(sorted[1].suit).toBe("diamonds");
@@ -174,10 +175,10 @@ describe("Card Utils", () => {
     it("should not modify original array", () => {
       const cards: PlayingCard[] = [
         { suit: "hearts", rank: "A", id: "A-hearts" },
-        { suit: "clubs", rank: 2, id: "2-clubs" }
+        { suit: "clubs", rank: 2, id: "2-clubs" },
       ];
       const originalFirst = cards[0];
-      
+
       sortCards(cards);
       expect(cards[0]).toEqual(originalFirst);
     });
@@ -190,17 +191,33 @@ describe("Card Utils", () => {
     });
 
     it("should return correct symbols for face cards", () => {
-      expect(getCardSymbol({ suit: "clubs", rank: "J", id: "J-clubs" })).toBe("J♣");
-      expect(getCardSymbol({ suit: "diamonds", rank: "Q", id: "Q-diamonds" })).toBe("Q♦");
-      expect(getCardSymbol({ suit: "spades", rank: "K", id: "K-spades" })).toBe("K♠");
-      expect(getCardSymbol({ suit: "hearts", rank: "A", id: "A-hearts" })).toBe("A♥");
+      expect(getCardSymbol({ suit: "clubs", rank: "J", id: "J-clubs" })).toBe(
+        "J♣",
+      );
+      expect(
+        getCardSymbol({ suit: "diamonds", rank: "Q", id: "Q-diamonds" }),
+      ).toBe("Q♦");
+      expect(getCardSymbol({ suit: "spades", rank: "K", id: "K-spades" })).toBe(
+        "K♠",
+      );
+      expect(getCardSymbol({ suit: "hearts", rank: "A", id: "A-hearts" })).toBe(
+        "A♥",
+      );
     });
 
     it("should return correct suit symbols", () => {
-      expect(getCardSymbol({ suit: "clubs", rank: 2, id: "2-clubs" })).toBe("2♣");
-      expect(getCardSymbol({ suit: "diamonds", rank: 2, id: "2-diamonds" })).toBe("2♦");
-      expect(getCardSymbol({ suit: "hearts", rank: 2, id: "2-hearts" })).toBe("2♥");
-      expect(getCardSymbol({ suit: "spades", rank: 2, id: "2-spades" })).toBe("2♠");
+      expect(getCardSymbol({ suit: "clubs", rank: 2, id: "2-clubs" })).toBe(
+        "2♣",
+      );
+      expect(
+        getCardSymbol({ suit: "diamonds", rank: 2, id: "2-diamonds" }),
+      ).toBe("2♦");
+      expect(getCardSymbol({ suit: "hearts", rank: 2, id: "2-hearts" })).toBe(
+        "2♥",
+      );
+      expect(getCardSymbol({ suit: "spades", rank: 2, id: "2-spades" })).toBe(
+        "2♠",
+      );
     });
   });
 
@@ -211,9 +228,9 @@ describe("Card Utils", () => {
         { suit: "hearts", rank: "K", id: "K-hearts" },
         { suit: "hearts", rank: "Q", id: "Q-hearts" },
         { suit: "hearts", rank: "J", id: "J-hearts" },
-        { suit: "hearts", rank: 10, id: "10-hearts" }
+        { suit: "hearts", rank: 10, id: "10-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("royal-flush");
       expect(result.rank).toBe(10);
@@ -225,9 +242,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: 8, id: "8-clubs" },
         { suit: "clubs", rank: 7, id: "7-clubs" },
         { suit: "clubs", rank: 6, id: "6-clubs" },
-        { suit: "clubs", rank: 5, id: "5-clubs" }
+        { suit: "clubs", rank: 5, id: "5-clubs" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("straight-flush");
       expect(result.rank).toBe(9);
@@ -239,9 +256,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "A", id: "A-clubs" },
         { suit: "diamonds", rank: "A", id: "A-diamonds" },
         { suit: "spades", rank: "A", id: "A-spades" },
-        { suit: "hearts", rank: 2, id: "2-hearts" }
+        { suit: "hearts", rank: 2, id: "2-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("four-of-a-kind");
       expect(result.rank).toBe(8);
@@ -253,9 +270,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "K", id: "K-clubs" },
         { suit: "diamonds", rank: "K", id: "K-diamonds" },
         { suit: "spades", rank: 2, id: "2-spades" },
-        { suit: "hearts", rank: 2, id: "2-hearts" }
+        { suit: "hearts", rank: 2, id: "2-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("full-house");
       expect(result.rank).toBe(7);
@@ -267,9 +284,9 @@ describe("Card Utils", () => {
         { suit: "diamonds", rank: 10, id: "10-diamonds" },
         { suit: "diamonds", rank: 8, id: "8-diamonds" },
         { suit: "diamonds", rank: 5, id: "5-diamonds" },
-        { suit: "diamonds", rank: 3, id: "3-diamonds" }
+        { suit: "diamonds", rank: 3, id: "3-diamonds" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("flush");
       expect(result.rank).toBe(6);
@@ -281,9 +298,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: 9, id: "9-clubs" },
         { suit: "diamonds", rank: 8, id: "8-diamonds" },
         { suit: "spades", rank: 7, id: "7-spades" },
-        { suit: "hearts", rank: 6, id: "6-hearts" }
+        { suit: "hearts", rank: 6, id: "6-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("straight");
       expect(result.rank).toBe(5);
@@ -295,9 +312,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: 5, id: "5-clubs" },
         { suit: "diamonds", rank: 4, id: "4-diamonds" },
         { suit: "spades", rank: 3, id: "3-spades" },
-        { suit: "hearts", rank: 2, id: "2-hearts" }
+        { suit: "hearts", rank: 2, id: "2-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("straight");
       expect(result.rank).toBe(5);
@@ -309,9 +326,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "Q", id: "Q-clubs" },
         { suit: "diamonds", rank: "Q", id: "Q-diamonds" },
         { suit: "spades", rank: 7, id: "7-spades" },
-        { suit: "hearts", rank: 3, id: "3-hearts" }
+        { suit: "hearts", rank: 3, id: "3-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("three-of-a-kind");
       expect(result.rank).toBe(4);
@@ -323,9 +340,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "K", id: "K-clubs" },
         { suit: "diamonds", rank: 7, id: "7-diamonds" },
         { suit: "spades", rank: 7, id: "7-spades" },
-        { suit: "hearts", rank: 3, id: "3-hearts" }
+        { suit: "hearts", rank: 3, id: "3-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("two-pair");
       expect(result.rank).toBe(3);
@@ -337,9 +354,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "A", id: "A-clubs" },
         { suit: "diamonds", rank: "K", id: "K-diamonds" },
         { suit: "spades", rank: 7, id: "7-spades" },
-        { suit: "hearts", rank: 3, id: "3-hearts" }
+        { suit: "hearts", rank: 3, id: "3-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("one-pair");
       expect(result.rank).toBe(2);
@@ -351,9 +368,9 @@ describe("Card Utils", () => {
         { suit: "clubs", rank: "K", id: "K-clubs" },
         { suit: "diamonds", rank: "Q", id: "Q-diamonds" },
         { suit: "spades", rank: 9, id: "9-spades" },
-        { suit: "hearts", rank: 7, id: "7-hearts" }
+        { suit: "hearts", rank: 7, id: "7-hearts" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       expect(result.hand).toBe("high-card");
       expect(result.rank).toBe(1);
@@ -362,9 +379,9 @@ describe("Card Utils", () => {
     it("should handle less than 5 cards by padding", () => {
       const cards: PlayingCard[] = [
         { suit: "hearts", rank: "A", id: "A-hearts" },
-        { suit: "clubs", rank: "A", id: "A-clubs" }
+        { suit: "clubs", rank: "A", id: "A-clubs" },
       ];
-      
+
       const result = evaluatePokerHand(cards);
       // With padding logic adding 3 cards of rank 2, this becomes a full house (2 Aces + 3 twos)
       expect(result.hand).toBe("full-house");
@@ -383,8 +400,8 @@ describe("Card Utils", () => {
             { suit: "clubs" as Suit, rank: "A" as Rank, id: "A-clubs" },
             { suit: "diamonds" as Suit, rank: "K" as Rank, id: "K-diamonds" },
             { suit: "spades" as Suit, rank: 7 as Rank, id: "7-spades" },
-            { suit: "hearts" as Suit, rank: 3 as Rank, id: "3-hearts" }
-          ]
+            { suit: "hearts" as Suit, rank: 3 as Rank, id: "3-hearts" },
+          ],
         },
         {
           userId: "user2",
@@ -394,9 +411,9 @@ describe("Card Utils", () => {
             { suit: "clubs" as Suit, rank: "K" as Rank, id: "K-clubs" },
             { suit: "diamonds" as Suit, rank: "K" as Rank, id: "K-diamonds" },
             { suit: "spades" as Suit, rank: 2 as Rank, id: "2-spades" },
-            { suit: "hearts" as Suit, rank: 2 as Rank, id: "2-hearts" }
-          ]
-        }
+            { suit: "hearts" as Suit, rank: 2 as Rank, id: "2-hearts" },
+          ],
+        },
       ];
 
       const winner = determinePokerWinner(participants);
@@ -415,8 +432,8 @@ describe("Card Utils", () => {
             { suit: "clubs" as Suit, rank: "A" as Rank, id: "A-clubs" },
             { suit: "diamonds" as Suit, rank: "K" as Rank, id: "K-diamonds" },
             { suit: "spades" as Suit, rank: 7 as Rank, id: "7-spades" },
-            { suit: "hearts" as Suit, rank: 3 as Rank, id: "3-hearts" }
-          ]
+            { suit: "hearts" as Suit, rank: 3 as Rank, id: "3-hearts" },
+          ],
         },
         {
           userId: "user2",
@@ -426,9 +443,9 @@ describe("Card Utils", () => {
             { suit: "diamonds" as Suit, rank: "K" as Rank, id: "K-diamonds2" },
             { suit: "spades" as Suit, rank: "Q" as Rank, id: "Q-spades" },
             { suit: "hearts" as Suit, rank: 8 as Rank, id: "8-hearts" },
-            { suit: "clubs" as Suit, rank: 4 as Rank, id: "4-clubs" }
-          ]
-        }
+            { suit: "clubs" as Suit, rank: 4 as Rank, id: "4-clubs" },
+          ],
+        },
       ];
 
       const winner = determinePokerWinner(participants);
@@ -448,9 +465,9 @@ describe("Card Utils", () => {
           userName: "Alice",
           cards: [
             { suit: "hearts" as Suit, rank: "A" as Rank, id: "A-hearts" },
-            { suit: "clubs" as Suit, rank: 2 as Rank, id: "2-clubs" }
-          ]
-        }
+            { suit: "clubs" as Suit, rank: 2 as Rank, id: "2-clubs" },
+          ],
+        },
       ];
 
       const winner = determinePokerWinner(participants);

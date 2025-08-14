@@ -55,7 +55,7 @@ export interface PlayingCard {
   id: string; // Unique identifier for the card
 }
 
-export type PokerHand = 
+export type PokerHand =
   | "royal-flush"
   | "straight-flush"
   | "four-of-a-kind"

@@ -30,13 +30,13 @@ export function ResultsView(props: ResultsViewProps) {
   // Get non-voters from the snapshot
   const nonVoters =
     props.participantsSnapshot?.filter(
-      (participant) => !props.votes.get(participant.userId)
+      (participant) => !props.votes.get(participant.userId),
     ) || [];
 
   // Calculate consensus and spread metrics
   const totalVotes = props.voteResults.reduce(
     (sum, result) => sum + result.count,
-    0
+    0,
   );
   const hasConsensus = props.voteResults.length === 1 && nonVoters.length === 0;
   const mostVotes = Math.max(...props.voteResults.map((r) => r.count));

@@ -73,11 +73,11 @@ Widget (organisms/widget.tsx)
 
 ### Test Commands
 
-| Command               | Purpose                                    |
-| --------------------- | ------------------------------------------ |
-| `npm run test`        | Run all tests once                         |
-| `npm run test:ui`     | Run tests with interactive UI             |
-| `npm test -- watch`   | Run tests in watch mode                    |
+| Command                 | Purpose                                  |
+| ----------------------- | ---------------------------------------- |
+| `npm run test`          | Run all tests once                       |
+| `npm run test:ui`       | Run tests with interactive UI            |
+| `npm test -- watch`     | Run tests in watch mode                  |
 | `npm test -- <pattern>` | Run specific test files matching pattern |
 
 ### Test Structure
