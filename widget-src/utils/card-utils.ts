@@ -61,6 +61,22 @@ export function addCardToParticipant(
   return updatedCards;
 }
 
+// Replace a random card in participant's collection
+export function replaceRandomCard(existingCards: PlayingCard[]): PlayingCard[] {
+  if (existingCards.length === 0) return existingCards;
+
+  const newCard = drawRandomCard();
+  const updatedCards = [...existingCards];
+
+  // Remove a random card
+  const randomIndex = Math.floor(Math.random() * updatedCards.length);
+  updatedCards.splice(randomIndex, 1);
+
+  // Add the new card
+  updatedCards.push(newCard);
+  return updatedCards;
+}
+
 // Sort cards for display (ascending order by rank, then by suit)
 export function sortCards(cards: PlayingCard[]): PlayingCard[] {
   const rankOrder: Record<Rank, number> = {

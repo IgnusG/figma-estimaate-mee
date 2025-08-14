@@ -33,6 +33,7 @@ export function ParticipantStatus(props: ParticipantStatusProps) {
         {props.participants.map((participant) => (
           <ParticipantBadge
             key={participant.userId}
+            userId={participant.userId}
             userName={participant.userName}
             hasVoted={participant.hasVoted}
             showSyncIndicator={participant.showSyncIndicator}

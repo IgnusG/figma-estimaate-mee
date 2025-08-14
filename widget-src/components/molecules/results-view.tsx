@@ -24,6 +24,7 @@ export interface ResultsViewProps {
   votes: SyncedMapLike<Vote>;
   showPokerResults?: boolean;
   onRevealCards?: () => void;
+  onReplaceRandomCard?: () => void;
 }
 
 export function ResultsView(props: ResultsViewProps) {
@@ -305,6 +306,41 @@ export function ResultsView(props: ResultsViewProps) {
                 </AutoLayout>
               ))}
           </AutoLayout>
+        </AutoLayout>
+      )}
+
+      {/* Card Replacement Button - visible to all, but only affects clicking user */}
+      {participantsWithCards.length > 0 && (
+        <AutoLayout
+          direction="vertical"
+          spacing={8}
+          padding={12}
+          fill="#FFF3E0"
+          cornerRadius={8}
+          width="fill-parent"
+          horizontalAlignItems="center"
+        >
+          <Text
+            fontSize={16}
+            fontWeight="bold"
+            fill="#E65100"
+            horizontalAlignText="center"
+          >
+            🎴 Card Management
+          </Text>
+          <Text fontSize={14} fill="#E65100" horizontalAlignText="center">
+            Replace one of your cards with a new random card
+          </Text>
+          <ActionButton
+            text="Replace Random Card"
+            variant="secondary"
+            size="medium"
+            onClick={() => {
+              if (props.onReplaceRandomCard) {
+                props.onReplaceRandomCard();
+              }
+            }}
+          />
         </AutoLayout>
       )}
 

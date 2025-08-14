@@ -4,6 +4,7 @@ import {
   shuffleDeck,
   drawRandomCard,
   addCardToParticipant,
+  replaceRandomCard,
   sortCards,
   getCardSymbol,
   evaluatePokerHand,
@@ -138,6 +139,49 @@ describe("Card Utils", () => {
       const resultIds = result.map((c) => c.id);
       const hasNewCard = resultIds.some((id) => !originalIds.includes(id));
       expect(hasNewCard).toBe(true);
+    });
+  });
+
+  describe("replaceRandomCard", () => {
+    it("should return empty array when no cards provided", () => {
+      const result = replaceRandomCard([]);
+      expect(result).toEqual([]);
+    });
+
+    it("should maintain same number of cards", () => {
+      const existingCards: PlayingCard[] = [
+        { suit: "hearts", rank: 2, id: "2-hearts" },
+        { suit: "clubs", rank: "A", id: "A-clubs" },
+        { suit: "diamonds", rank: "K", id: "K-diamonds" },
+      ];
+      const result = replaceRandomCard(existingCards);
+      expect(result).toHaveLength(3);
+    });
+
+    it("should contain a new card (not all original cards)", () => {
+      const existingCards: PlayingCard[] = [
+        { suit: "hearts", rank: 2, id: "2-hearts" },
+        { suit: "clubs", rank: "A", id: "A-clubs" },
+      ];
+      const result = replaceRandomCard(existingCards);
+
+      // Should have same number of cards
+      expect(result).toHaveLength(2);
+
+      // Should contain at least one new card
+      const originalIds = existingCards.map((c) => c.id);
+      const resultIds = result.map((c) => c.id);
+      const hasNewCard = resultIds.some((id) => !originalIds.includes(id));
+      expect(hasNewCard).toBe(true);
+    });
+
+    it("should work with single card", () => {
+      const existingCards: PlayingCard[] = [
+        { suit: "hearts", rank: 2, id: "2-hearts" },
+      ];
+      const result = replaceRandomCard(existingCards);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).not.toBe("2-hearts");
     });
   });
 
@@ -376,16 +420,16 @@ describe("Card Utils", () => {
       expect(result.rank).toBe(1);
     });
 
-    it("should handle less than 5 cards by padding", () => {
+    it("should handle less than 5 cards without padding", () => {
       const cards: PlayingCard[] = [
         { suit: "hearts", rank: "A", id: "A-hearts" },
         { suit: "clubs", rank: "A", id: "A-clubs" },
       ];
 
       const result = evaluatePokerHand(cards);
-      // With padding logic adding 3 cards of rank 2, this becomes a full house (2 Aces + 3 twos)
-      expect(result.hand).toBe("full-house");
-      expect(result.cards).toHaveLength(5);
+      // With 2 Aces, this should be evaluated as one pair
+      expect(result.hand).toBe("one-pair");
+      expect(result.cards).toHaveLength(2);
     });
   });
 
