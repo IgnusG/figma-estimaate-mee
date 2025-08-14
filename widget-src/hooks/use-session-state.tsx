@@ -1,5 +1,6 @@
 import { SessionState, Participant, Vote, SyncedMapLike } from "../utils/types";
 import { debug } from "../utils/debug";
+import { addCardToParticipant } from "../utils/card-utils";
 
 export interface UseSessionStateReturn {
   sessionState: SessionState;
@@ -14,6 +15,7 @@ export function useSessionState(
   setSessionState: (state: SessionState) => void,
   participants: SyncedMapLike<Participant>,
   votes: SyncedMapLike<Vote>,
+  setShowPokerResults?: (show: boolean) => void,
 ): UseSessionStateReturn {
   const startSession = () => {
     try {
@@ -56,7 +58,23 @@ export function useSessionState(
       if (userId) {
         debug.log("Revealing results");
 
-        // Capture snapshot of current participants
+        // Distribute cards to participants who voted first
+        const voterIds = votes.keys();
+        debug.log("Distributing cards to voters:", voterIds);
+        
+        for (const voterId of voterIds) {
+          const participant = participants.get(voterId);
+          if (participant) {
+            const updatedCards = addCardToParticipant(participant.cards);
+            participants.set(voterId, {
+              ...participant,
+              cards: updatedCards
+            });
+            debug.log(`Added card to ${participant.userName}, now has ${updatedCards.length} cards`);
+          }
+        }
+
+        // Capture snapshot of current participants AFTER card distribution
         const currentParticipants: Participant[] = [];
         try {
           const activeUsers = figma.activeUsers || [];
@@ -69,6 +87,7 @@ export function useSessionState(
                   userId: user.id,
                   userName: user.name || "Anonymous",
                   joinedAt: participant?.joinedAt || Date.now(),
+                  cards: participant?.cards, // Include cards in snapshot
                 });
               }
             });
@@ -118,6 +137,11 @@ export function useSessionState(
           status: "voting",
           participantsSnapshot: undefined, // Clear the snapshot for new session
         });
+        
+        // Reset poker results
+        if (setShowPokerResults) {
+          setShowPokerResults(false);
+        }
       }
     } catch (error) {
       debug.error("Error resetting session:", error);

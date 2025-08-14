@@ -35,6 +35,10 @@ export function Widget() {
     "recentVotes",
     {},
   );
+  const [showPokerResults, setShowPokerResults] = useSyncedState<boolean>(
+    "showPokerResults",
+    false,
+  );
   const votes = useSyncedMap<Vote>("votes");
   const participants = useSyncedMap<Participant>("participants");
 
@@ -113,6 +117,7 @@ export function Widget() {
     setSessionStateData,
     participants,
     votes,
+    setShowPokerResults,
   );
 
   // Custom function to add recent votes
@@ -121,6 +126,11 @@ export function Widget() {
   };
   
   const votingControls = useVoting(votes, count, setCount, addRecentVote);
+
+  // Reveal cards handler
+  const handleRevealCards = () => {
+    setShowPokerResults(true);
+  };
 
   // Clear recent votes after 1 second
   useEffect(() => {
@@ -152,6 +162,8 @@ export function Widget() {
         onReset={sessionControls.resetSession}
         participantsSnapshot={sessionStateData.participantsSnapshot}
         votes={votes}
+        showPokerResults={showPokerResults}
+        onRevealCards={handleRevealCards}
       />
     );
   }
@@ -171,6 +183,7 @@ export function Widget() {
         userName: participant.userName,
         hasVoted,
         showSyncIndicator,
+        cards: participant.cards,
       };
     })
     .filter(Boolean)
@@ -179,6 +192,7 @@ export function Widget() {
     userName: string;
     hasVoted: boolean;
     showSyncIndicator: boolean;
+    cards?: import("../../utils/types").PlayingCard[];
   }>;
 
   return (

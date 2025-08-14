@@ -8,13 +8,17 @@ import {
   Participant,
   Vote,
   SyncedMapLike,
+  PokerWinner,
 } from "../../utils/types";
+import { determinePokerWinner, getPokerHandName, sortCards, getCardSymbol } from "../../utils/card-utils";
 
 export interface ResultsViewProps {
   voteResults: VoteResult[];
   onReset: () => void;
   participantsSnapshot?: Participant[];
   votes: SyncedMapLike<Vote>;
+  showPokerResults?: boolean;
+  onRevealCards?: () => void;
 }
 
 export function ResultsView(props: ResultsViewProps) {
@@ -45,6 +49,20 @@ export function ResultsView(props: ResultsViewProps) {
   };
 
   const summary = getResultSummary();
+
+  // Get participants with cards for poker game
+  const participantsWithCards = (props.participantsSnapshot || [])
+    .filter(participant => participant.cards && participant.cards.length > 0)
+    .map(participant => ({
+      userId: participant.userId,
+      userName: participant.userName,
+      cards: participant.cards!
+    }));
+
+  // Determine poker winner if showing poker results
+  const pokerWinner: PokerWinner | null = props.showPokerResults && participantsWithCards.length > 0
+    ? determinePokerWinner(participantsWithCards)
+    : null;
 
   return (
     <AutoLayout
@@ -131,6 +149,88 @@ export function ResultsView(props: ResultsViewProps) {
           </AutoLayout>
         )}
       </AutoLayout>
+
+      {/* Poker Cards Section */}
+      {participantsWithCards.length > 0 && !props.showPokerResults && props.onRevealCards && (
+        <AutoLayout
+          direction="vertical"
+          spacing={8}
+          padding={12}
+          fill="#F0F8FF"
+          cornerRadius={8}
+          width="fill-parent"
+        >
+          <Text fontSize={16} fontWeight="bold" fill="#0C5AA6" horizontalAlignText="center">
+            🃏 Poker Cards Ready!
+          </Text>
+          <Text fontSize={14} fill="#0C5AA6" horizontalAlignText="center">
+            {participantsWithCards.length} player{participantsWithCards.length !== 1 ? 's' : ''} have cards
+          </Text>
+          <ActionButton
+            text="Reveal Cards & Determine Winner"
+            variant="secondary"
+            size="medium"
+            onClick={props.onRevealCards}
+          />
+        </AutoLayout>
+      )}
+
+      {/* Poker Results */}
+      {props.showPokerResults && pokerWinner && (
+        <AutoLayout
+          direction="vertical"
+          spacing={12}
+          padding={16}
+          fill="#E8F5E8"
+          cornerRadius={8}
+          width="fill-parent"
+        >
+          <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
+            <Text fontSize={24}>🏆</Text>
+            <Text fontSize={18} fontWeight="bold" fill="#28A745" horizontalAlignText="center">
+              Poker Winner: {pokerWinner.userName}
+            </Text>
+            <Text fontSize={14} fill="#28A745" horizontalAlignText="center">
+              {getPokerHandName(pokerWinner.hand.hand)}
+            </Text>
+            <Text fontSize={12} fill="#666" horizontalAlignText="center">
+              Cards: {sortCards(pokerWinner.cards).map(card => getCardSymbol(card)).join(", ")}
+            </Text>
+          </AutoLayout>
+
+          {/* Show all participants' cards */}
+          <AutoLayout direction="vertical" spacing={8}>
+            <Text fontSize={14} fontWeight="bold" fill="#28A745" horizontalAlignText="center">
+              All Player Cards:
+            </Text>
+            {participantsWithCards
+              .sort((a, b) => {
+                if (a.userId === pokerWinner.userId) return -1;
+                if (b.userId === pokerWinner.userId) return 1;
+                return a.userName.localeCompare(b.userName);
+              })
+              .map(participant => (
+                <AutoLayout
+                  key={participant.userId}
+                  direction="horizontal"
+                  spacing={8}
+                  padding={8}
+                  fill={participant.userId === pokerWinner.userId ? "#D4F5D4" : "#F5F5F5"}
+                  cornerRadius={4}
+                  width="fill-parent"
+                  horizontalAlignItems="center"
+                >
+                  <Text fontSize={12} fontWeight="bold" fill="#333">
+                    {participant.userName}:
+                  </Text>
+                  <Text fontSize={12} fill="#666">
+                    {sortCards(participant.cards).map(card => getCardSymbol(card)).join(", ")}
+                  </Text>
+                </AutoLayout>
+              ))}
+          </AutoLayout>
+        </AutoLayout>
+      )}
 
       <ActionButton
         text="Start New Round"
