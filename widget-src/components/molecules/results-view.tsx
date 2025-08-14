@@ -199,7 +199,7 @@ export function ResultsView(props: ResultsViewProps) {
           </AutoLayout>
 
           {/* Show all participants' cards */}
-          <AutoLayout direction="vertical" spacing={8}>
+          <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
             <Text fontSize={14} fontWeight="bold" fill="#28A745" horizontalAlignText="center">
               All Player Cards:
             </Text>
