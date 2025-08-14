@@ -249,37 +249,7 @@ export function Widget() {
           Choose your estimate
         </Text>
         <AutoLayout horizontalAlignItems="end" width="fill-parent" spacing={8}>
-          <AutoLayout
-            direction="vertical"
-            spacing={4}
-            horizontalAlignItems="end"
-          >
-            <AutoLayout direction="horizontal" spacing={8}>
-              <AutoLayout
-                onClick={sessionControls.replaceRandomCard}
-                padding={4}
-                cornerRadius={4}
-                fill="#FFF3E0"
-                stroke="#FFB74D"
-                strokeWidth={1}
-              >
-                <Text fontSize={10} fill="#E65100">
-                  🎴 Replace Card
-                </Text>
-              </AutoLayout>
-              <AutoLayout
-                onClick={() => setDebugEnabled(!debugEnabled)}
-                padding={4}
-                cornerRadius={4}
-                fill={debugEnabled ? "#E6F7FF" : "#F5F5F5"}
-                stroke={debugEnabled ? "#1890FF" : "#D9D9D9"}
-                strokeWidth={1}
-              >
-                <Text fontSize={10} fill={debugEnabled ? "#1890FF" : "#8C8C8C"}>
-                  {debugEnabled ? "🐛 Debug on" : "Debug off"}
-                </Text>
-              </AutoLayout>
-            </AutoLayout>
+          <AutoLayout direction="horizontal" spacing={8}>
             <AutoLayout
               onClick={handlePokerToggle}
               padding={4}
@@ -290,6 +260,18 @@ export function Widget() {
             >
               <Text fontSize={10} fill={pokerEnabled ? "#2E7D32" : "#C62828"}>
                 {pokerEnabled ? "🃏 Poker on" : "🚫 Poker off"}
+              </Text>
+            </AutoLayout>
+            <AutoLayout
+              onClick={() => setDebugEnabled(!debugEnabled)}
+              padding={4}
+              cornerRadius={4}
+              fill={debugEnabled ? "#E6F7FF" : "#F5F5F5"}
+              stroke={debugEnabled ? "#1890FF" : "#D9D9D9"}
+              strokeWidth={1}
+            >
+              <Text fontSize={10} fill={debugEnabled ? "#1890FF" : "#8C8C8C"}>
+                {debugEnabled ? "🐛 Debug on" : "Debug off"}
               </Text>
             </AutoLayout>
           </AutoLayout>
