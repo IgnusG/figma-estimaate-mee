@@ -21,17 +21,20 @@ describe("useVoting hook - Multi-user scenarios", () => {
     sharedVotesMap = new Map<string, Vote>();
 
     // Create mock synced maps for each user that all reference the same underlying map
-    const createUserVotesMap = () => ({
-      get: (key: string) => sharedVotesMap.get(key),
-      set: (key: string, value: Vote) => sharedVotesMap.set(key, value),
-      delete: (key: string) => sharedVotesMap.delete(key),
-      has: (key: string) => sharedVotesMap.has(key),
-      clear: () => sharedVotesMap.clear(),
-      keys: () => Array.from(sharedVotesMap.keys()),
-      values: () => Array.from(sharedVotesMap.values()),
-      entries: () => Array.from(sharedVotesMap.entries()),
-      get size() { return sharedVotesMap.size; },
-    } as SyncedMapLike<Vote>);
+    const createUserVotesMap = () =>
+      ({
+        get: (key: string) => sharedVotesMap.get(key),
+        set: (key: string, value: Vote) => sharedVotesMap.set(key, value),
+        delete: (key: string) => sharedVotesMap.delete(key),
+        has: (key: string) => sharedVotesMap.has(key),
+        clear: () => sharedVotesMap.clear(),
+        keys: () => Array.from(sharedVotesMap.keys()),
+        values: () => Array.from(sharedVotesMap.values()),
+        entries: () => Array.from(sharedVotesMap.entries()),
+        get size() {
+          return sharedVotesMap.size;
+        },
+      }) as SyncedMapLike<Vote>;
 
     mockVotesUser1 = createUserVotesMap();
     mockVotesUser2 = createUserVotesMap();
@@ -47,7 +50,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        mockSetCount
+        mockSetCount,
       );
 
       handleVoteUser1("user-1", 5);
@@ -65,7 +68,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        mockSetCount
+        mockSetCount,
       );
 
       handleVoteUser2("user-2", 8);
@@ -86,21 +89,21 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       global.figma = { currentUser: mockUsers.user2 } as any;
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       global.figma = { currentUser: mockUsers.user3 } as any;
       const { handleVote: handleVoteUser3 } = useVoting(
         mockVotesUser3,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       // All users vote
@@ -140,14 +143,14 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       global.figma = { currentUser: mockUsers.user2 } as any;
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       // Rapid changes from User 1
@@ -174,14 +177,14 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       global.figma = { currentUser: mockUsers.user2 } as any;
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       // Both users vote for the same value
@@ -206,14 +209,14 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       global.figma = { currentUser: mockUsers.user2 } as any;
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       // User 1 selects a joker card
@@ -264,10 +267,10 @@ describe("useVoting hook - Multi-user scenarios", () => {
 
       global.figma = { currentUser: mockUsers.user1 } as any;
       const voting1 = useVoting(mockVotesUser1, 0, vi.fn());
-      
+
       // Check initial grouped results
       expect(voting1.groupedResults).toHaveLength(2);
-      const fiveVotes = voting1.groupedResults.find(r => r.value === 5);
+      const fiveVotes = voting1.groupedResults.find((r) => r.value === 5);
       expect(fiveVotes?.count).toBe(2);
       expect(fiveVotes?.participants).toHaveLength(2);
 
@@ -276,9 +279,11 @@ describe("useVoting hook - Multi-user scenarios", () => {
 
       // Re-fetch voting state to get updated results
       const voting1Updated = useVoting(mockVotesUser1, 0, vi.fn());
-      
+
       // Check updated grouped results
-      const fiveVotesUpdated = voting1Updated.groupedResults.find(r => r.value === 5);
+      const fiveVotesUpdated = voting1Updated.groupedResults.find(
+        (r) => r.value === 5,
+      );
       expect(fiveVotesUpdated?.count).toBe(1);
       expect(fiveVotesUpdated?.participants).toHaveLength(1);
       expect(fiveVotesUpdated?.participants[0].userId).toBe("user-2");
@@ -300,17 +305,14 @@ describe("useVoting hook - Multi-user scenarios", () => {
       });
 
       global.figma = { currentUser: mockUsers.user1 } as any;
-      const { handleVote: handleVoteUser1, groupedResults: results1 } = useVoting(
-        mockVotesUser1,
-        0,
-        vi.fn()
-      );
+      const { handleVote: handleVoteUser1, groupedResults: results1 } =
+        useVoting(mockVotesUser1, 0, vi.fn());
 
       global.figma = { currentUser: mockUsers.user2 } as any;
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       expect(results1).toHaveLength(1);
@@ -325,7 +327,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { groupedResults: resultsAfter } = useVoting(
         mockVotesUser1,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       expect(resultsAfter).toHaveLength(0);
@@ -338,7 +340,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        vi.fn()
+        vi.fn(),
       );
 
       // User votes
@@ -363,14 +365,14 @@ describe("useVoting hook - Multi-user scenarios", () => {
       const { handleVote: handleVoteUser1 } = useVoting(
         mockVotesUser1,
         0,
-        user1Count
+        user1Count,
       );
 
       global.figma = { currentUser: mockUsers.user2 } as any;
       const { handleVote: handleVoteUser2 } = useVoting(
         mockVotesUser2,
         0,
-        user2Count
+        user2Count,
       );
 
       // Simulate concurrent operations
@@ -384,7 +386,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       ];
 
       // Execute all operations
-      operations.forEach(op => op());
+      operations.forEach((op) => op());
 
       // Verify final state
       expect(mockVotesUser1.get("user-1")?.value).toBe(3);

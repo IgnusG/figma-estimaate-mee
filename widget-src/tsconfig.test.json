@@ -6,11 +6,6 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": [
-    "**/*.test.ts",
-    "test-setup.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*.test.ts", "test-setup.ts"],
+  "exclude": ["node_modules"]
 }

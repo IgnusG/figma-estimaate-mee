@@ -20,7 +20,7 @@ class DebugLogger {
 
   toggle() {
     this.enabled = !this.enabled;
-    console.log(`🐛 Debug logging ${this.enabled ? 'enabled' : 'disabled'}`);
+    console.log(`🐛 Debug logging ${this.enabled ? "enabled" : "disabled"}`);
   }
 
   isEnabled() {

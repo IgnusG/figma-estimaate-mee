@@ -1,13 +1,13 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./widget-src/test-setup.ts'],
-    include: ['widget-src/**/*.test.ts'],
+    environment: "jsdom",
+    setupFiles: ["./widget-src/test-setup.ts"],
+    include: ["widget-src/**/*.test.ts"],
     typecheck: {
-      tsconfig: './widget-src/tsconfig.test.json'
-    }
+      tsconfig: "./widget-src/tsconfig.test.json",
+    },
   },
 });

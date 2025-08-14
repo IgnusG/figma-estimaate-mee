@@ -11,7 +11,7 @@ export interface EstimationCardProps {
 }
 
 export function Card(props: EstimationCardProps) {
-  const cardVariant = typeof props.value === 'string' ? 'joker' : 'story'; 
+  const cardVariant = typeof props.value === "string" ? "joker" : "story";
 
   // 2:3 aspect ratio (width:height)
   const baseWidth = 120;
@@ -31,15 +31,17 @@ export function Card(props: EstimationCardProps) {
         cornerRadius={12}
         hoverStyle={{
           fill: "#FFFFFF",
-          stroke: cardVariant === 'joker' ? "#FF6B35" : "#007AFF"
+          stroke: cardVariant === "joker" ? "#FF6B35" : "#007AFF",
         }}
-        effect={[{
-          type: "drop-shadow",
-          color: "#00000015",
-          offset: { x: 0, y: 4 },
-          blur: 8,
-          spread: 0,
-        }]}
+        effect={[
+          {
+            type: "drop-shadow",
+            color: "#00000015",
+            offset: { x: 0, y: 4 },
+            blur: 8,
+            spread: 0,
+          },
+        ]}
       >
         {/* Normal image - visible by default, hidden on hover */}
         <Image
@@ -48,7 +50,7 @@ export function Card(props: EstimationCardProps) {
           height={baseHeight}
           opacity={1}
           hoverStyle={{
-            opacity: 0
+            opacity: 0,
           }}
         />
         {/* Blurred image - hidden by default, visible on hover */}
@@ -59,13 +61,15 @@ export function Card(props: EstimationCardProps) {
           x={0}
           y={0}
           opacity={0}
-          effect={[{
-            type: "layer-blur",
-            blur: 12,
-            visible: true
-          }]}
+          effect={[
+            {
+              type: "layer-blur",
+              blur: 12,
+              visible: true,
+            },
+          ]}
           hoverStyle={{
-            opacity: 1
+            opacity: 1,
           }}
         />
         {/* Text overlay on hover - background only */}
@@ -77,7 +81,7 @@ export function Card(props: EstimationCardProps) {
           fill="#000000"
           opacity={0}
           hoverStyle={{
-            opacity: 0.3
+            opacity: 0.3,
           }}
         />
         {/* Text overlay on hover - text only */}
@@ -91,12 +95,12 @@ export function Card(props: EstimationCardProps) {
           verticalAlignItems="center"
           opacity={0}
           hoverStyle={{
-            opacity: 1
+            opacity: 1,
           }}
           padding={16}
           spacing={4}
         >
-          {cardVariant === 'story' && (
+          {cardVariant === "story" && (
             <Text
               fontSize={32}
               fill="#FFFFFF"
@@ -107,7 +111,7 @@ export function Card(props: EstimationCardProps) {
             </Text>
           )}
           <Text
-            fontSize={cardVariant === 'story' ? 14 : 16}
+            fontSize={cardVariant === "story" ? 14 : 16}
             fill="#FFFFFF"
             fontWeight="bold"
             horizontalAlignText="center"
@@ -137,21 +141,19 @@ export function Card(props: EstimationCardProps) {
       tooltip={props.tooltip}
       hoverStyle={{
         fill: "#FFFFFF",
-        stroke: cardVariant === 'joker' ? "#FF6B35" : "#007AFF"
+        stroke: cardVariant === "joker" ? "#FF6B35" : "#007AFF",
       }}
-      effect={[{
-        type: "drop-shadow",
-        color: "#00000015",
-        offset: { x: 0, y: 4 },
-        blur: 8,
-        spread: 0,
-      }]}
+      effect={[
+        {
+          type: "drop-shadow",
+          color: "#00000015",
+          offset: { x: 0, y: 4 },
+          blur: 8,
+          spread: 0,
+        },
+      ]}
     >
-      <Text
-        fontSize={28}
-        fill="#333333"
-        fontWeight="bold"
-      >
+      <Text fontSize={28} fill="#333333" fontWeight="bold">
         {props.value}
       </Text>
     </AutoLayout>

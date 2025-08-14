@@ -51,12 +51,14 @@ Estimatee-Mee includes a poker card gamification feature that adds an element of
 ### Card Set
 
 The system uses a standard 52-card deck:
+
 - **Ranks**: 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace
 - **Suits**: Clubs (♣), Diamonds (♦), Hearts (♥), Spades (♠)
 
 ### Poker Hand Rankings
 
 Winners are determined using standard poker hand rankings (highest to lowest):
+
 1. **Royal Flush**: A, K, Q, J, 10 of the same suit
 2. **Straight Flush**: Five consecutive cards of the same suit
 3. **Four of a Kind**: Four cards of the same rank

@@ -19,7 +19,7 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
   };
 
   const style = getVoteStyle();
-  
+
   // Create visual bar for vote count
   const maxVotes = 10; // Reasonable max for bar visualization
   const barWidth = Math.min((props.count / maxVotes) * 200, 200);
@@ -43,8 +43,19 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
         width="hug-contents"
         overflow="visible"
       >
-        <AutoLayout direction="vertical" spacing={8} width="fill-parent" overflow="visible">
-          <AutoLayout direction="horizontal" spacing={16} horizontalAlignItems="center" width="hug-contents" overflow="visible">
+        <AutoLayout
+          direction="vertical"
+          spacing={8}
+          width="fill-parent"
+          overflow="visible"
+        >
+          <AutoLayout
+            direction="horizontal"
+            spacing={16}
+            horizontalAlignItems="center"
+            width="hug-contents"
+            overflow="visible"
+          >
             <AutoLayout
               direction="horizontal"
               horizontalAlignItems="center"
@@ -69,7 +80,7 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
               </Text>
             </AutoLayout>
           </AutoLayout>
-          
+
           {/* Visual vote bar */}
           <AutoLayout
             width={barWidth}
@@ -79,28 +90,36 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
           />
         </AutoLayout>
       </AutoLayout>
-      
+
       {/* Participants with emojis - sorted alphabetically for consistent layout */}
       <AutoLayout direction="horizontal" spacing={10} wrap>
-        {props.participants.sort((a, b) => a.name.localeCompare(b.name)).map((participant, index) => (
-          <AutoLayout
-            key={participant.userId}
-            direction="horizontal"
-            spacing={6}
-            padding={{ horizontal: 10, vertical: 6 }}
-            fill="#FFFFFF"
-            cornerRadius={20}
-            horizontalAlignItems="center"
-            verticalAlignItems="center"
-          >
-            <Text fontSize={14}>
-              {index === 0 ? "🚀" : index === 1 ? "🎉" : index === 2 ? "🎆" : "👍"}
-            </Text>
-            <Text fontSize={14} fontWeight={"medium"} fill={style.accent}>
-              {participant.name}
-            </Text>
-          </AutoLayout>
-        ))}
+        {props.participants
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((participant, index) => (
+            <AutoLayout
+              key={participant.userId}
+              direction="horizontal"
+              spacing={6}
+              padding={{ horizontal: 10, vertical: 6 }}
+              fill="#FFFFFF"
+              cornerRadius={20}
+              horizontalAlignItems="center"
+              verticalAlignItems="center"
+            >
+              <Text fontSize={14}>
+                {index === 0
+                  ? "🚀"
+                  : index === 1
+                    ? "🎉"
+                    : index === 2
+                      ? "🎆"
+                      : "👍"}
+              </Text>
+              <Text fontSize={14} fontWeight={"medium"} fill={style.accent}>
+                {participant.name}
+              </Text>
+            </AutoLayout>
+          ))}
       </AutoLayout>
     </AutoLayout>
   );

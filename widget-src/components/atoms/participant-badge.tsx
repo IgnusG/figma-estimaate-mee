@@ -19,26 +19,26 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
 
   const getDisplayText = () => {
     let text = props.userName;
-    
+
     if (props.hasVoted && props.showSyncIndicator) {
       text += " ⚡";
     } else if (props.hasVoted) {
       text += " ✓";
     }
-    
+
     // Add card indicator if user has cards
     if (props.cards && props.cards.length > 0) {
       text += " 🃏";
     }
-    
+
     return text;
   };
 
   const getTooltipText = () => {
     if (!props.cards || props.cards.length === 0) return "";
-    
+
     const sortedCards = sortCards(props.cards);
-    const cardSymbols = sortedCards.map(card => getCardSymbol(card));
+    const cardSymbols = sortedCards.map((card) => getCardSymbol(card));
     return `Cards: ${cardSymbols.join(", ")}`;
   };
 

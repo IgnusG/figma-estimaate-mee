@@ -19,15 +19,18 @@ interface GlobalWithFigma {
 (globalThis as unknown as GlobalWithFigma).figma = {
   currentUser: null,
   activeUsers: [],
-  widget: {}
+  widget: {},
 } as MockFigma;
 
 // Export helper functions for tests
 export const mockFigmaUser = (id?: string, name?: string) => {
-  (globalThis as unknown as GlobalWithFigma).figma.currentUser = id || name ? { id, name } : null;
+  (globalThis as unknown as GlobalWithFigma).figma.currentUser =
+    id || name ? { id, name } : null;
 };
 
-export const mockFigmaActiveUsers = (users: Array<{ id?: string; name?: string }>) => {
+export const mockFigmaActiveUsers = (
+  users: Array<{ id?: string; name?: string }>,
+) => {
   (globalThis as unknown as GlobalWithFigma).figma.activeUsers = users;
 };
 
