@@ -94,26 +94,27 @@ describe("Vote Utils", () => {
   });
 
   describe("getEligibleVoters", () => {
-    it("should filter out spectators", () => {
+    it("should return all participants as eligible voters", () => {
       const participants: Participant[] = [
-        { userId: "user1", userName: "Alice", isSpectator: false, joinedAt: 1000 },
-        { userId: "user2", userName: "Bob", isSpectator: true, joinedAt: 1001 },
-        { userId: "user3", userName: "Charlie", isSpectator: false, joinedAt: 1002 },
+        { userId: "user1", userName: "Alice", joinedAt: 1000 },
+        { userId: "user2", userName: "Bob", joinedAt: 1001 },
+        { userId: "user3", userName: "Charlie", joinedAt: 1002 },
+      ];
+
+      const eligibleVoters = getEligibleVoters(participants);
+      expect(eligibleVoters).toHaveLength(3);
+      expect(eligibleVoters.map(p => p.userName)).toEqual(["Alice", "Bob", "Charlie"]);
+    });
+
+    it("should return all participants regardless of previous spectator status", () => {
+      const participants: Participant[] = [
+        { userId: "user1", userName: "Alice", joinedAt: 1000 },
+        { userId: "user2", userName: "Bob", joinedAt: 1001 },
       ];
 
       const eligibleVoters = getEligibleVoters(participants);
       expect(eligibleVoters).toHaveLength(2);
-      expect(eligibleVoters.map(p => p.userName)).toEqual(["Alice", "Charlie"]);
-    });
-
-    it("should return empty array when all are spectators", () => {
-      const participants: Participant[] = [
-        { userId: "user1", userName: "Alice", isSpectator: true, joinedAt: 1000 },
-        { userId: "user2", userName: "Bob", isSpectator: true, joinedAt: 1001 },
-      ];
-
-      const eligibleVoters = getEligibleVoters(participants);
-      expect(eligibleVoters).toHaveLength(0);
+      expect(eligibleVoters.map(p => p.userName)).toEqual(["Alice", "Bob"]);
     });
 
     it("should return empty array for empty input", () => {

@@ -39,7 +39,7 @@ export function groupVotesByValue(votes: SyncedMapLike<Vote>): VoteResult[] {
 }
 
 export function getEligibleVoters(participants: Participant[]): Participant[] {
-  return participants.filter((participant) => !participant.isSpectator);
+  return participants; // All participants are eligible to vote
 }
 
 export function calculateVoteProgress(votes: number, total: number): string {

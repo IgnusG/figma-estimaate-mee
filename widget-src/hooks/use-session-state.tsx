@@ -6,7 +6,7 @@ export interface UseSessionStateReturn {
   startSession: () => void;
   revealResults: () => void;
   resetSession: () => void;
-  joinSession: (asSpectator: boolean) => void;
+  joinSession: () => void;
 }
 
 export function useSessionState(
@@ -22,17 +22,15 @@ export function useSessionState(
 
       debug.log("Starting session:", { userId, userName });
 
-      // Add facilitator as participant
+      // Add user as participant
       participants.set(userId, {
         userId,
         userName,
-        isSpectator: false,
         joinedAt: Date.now(),
       });
 
       setSessionState({
         status: "voting",
-        facilitatorId: userId,
         participants: [userId],
       });
     } catch (error) {
@@ -42,12 +40,10 @@ export function useSessionState(
       participants.set(fallbackId, {
         userId: fallbackId,
         userName: "Anonymous",
-        isSpectator: false,
         joinedAt: Date.now(),
       });
       setSessionState({
         status: "voting",
-        facilitatorId: fallbackId,
         participants: [fallbackId],
       });
     }
@@ -55,9 +51,9 @@ export function useSessionState(
 
   const revealResults = () => {
     try {
-      // Only facilitator can reveal results
+      // Any participant can reveal results
       const userId = figma.currentUser?.id;
-      if (userId && userId === sessionState.facilitatorId) {
+      if (userId) {
         debug.log("Revealing results");
 
         // Capture snapshot of current participants
@@ -72,7 +68,6 @@ export function useSessionState(
                 currentParticipants.push({
                   userId: user.id,
                   userName: user.name || "Anonymous",
-                  isSpectator: participant?.isSpectator || false,
                   joinedAt: participant?.joinedAt || Date.now(),
                 });
               }
@@ -110,9 +105,9 @@ export function useSessionState(
 
   const resetSession = () => {
     try {
-      // Only facilitator can reset
+      // Any participant can reset
       const userId = figma.currentUser?.id;
-      if (userId && userId === sessionState.facilitatorId) {
+      if (userId) {
         debug.log("Resetting session");
         // Clear all votes
         for (const key of votes.keys()) {
@@ -129,7 +124,7 @@ export function useSessionState(
     }
   };
 
-  const joinSession = (asSpectator = false) => {
+  const joinSession = () => {
     try {
       const userId = figma.currentUser?.id || `user-${Date.now()}`;
       const userName = figma.currentUser?.name || "Anonymous";
@@ -139,7 +134,6 @@ export function useSessionState(
         participants.set(userId, {
           userId,
           userName,
-          isSpectator: asSpectator,
           joinedAt: Date.now(),
         });
 

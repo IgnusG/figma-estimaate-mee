@@ -9,7 +9,7 @@ import { useUserPolling } from "../../hooks/use-user-polling";
 import { WelcomeContent } from "../molecules/welcome-content";
 import { CardGrid } from "../molecules/card-grid";
 import { ParticipantStatus } from "../molecules/participant-status";
-import { FacilitatorControls } from "../molecules/facilitator-controls";
+import { SessionControls } from "../molecules/session-controls";
 import { ResultsView } from "../molecules/results-view";
 import { debug } from "../../utils/debug";
 
@@ -20,7 +20,6 @@ export function Widget() {
     "session",
     {
       status: "waiting",
-      facilitatorId: "",
       participants: [],
     },
   );
@@ -28,7 +27,7 @@ export function Widget() {
     "activeUserIds",
     [],
   );
-  const [pollingTrigger, setPollingTrigger] = useSyncedState<number>(
+  const [_pollingTrigger, setPollingTrigger] = useSyncedState<number>(
     "pollingTrigger",
     0,
   );
@@ -139,7 +138,7 @@ export function Widget() {
     if (hasChanges) {
       setRecentVotes(updatedRecentVotes);
     }
-  }, [recentVotes]);
+  });
 
   // Render different views based on session state
   if (sessionStateData.status === "waiting") {
@@ -223,8 +222,8 @@ export function Widget() {
         participants={participantStatusData}
       />
 
-      {/* Facilitator Controls */}
-      <FacilitatorControls onRevealResults={sessionControls.revealResults} />
+      {/* Session Controls */}
+      <SessionControls onRevealResults={sessionControls.revealResults} />
       
       <CardGrid
         cards={[...STORY_POINT_CARDS, ...JOKER_CARDS]}
