@@ -13,6 +13,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run tsc`      | Type check without emitting files                   |
 | `npm run test`     | Run tests with Vitest                               |
 | `npm run test:ui`  | Run tests with Vitest UI                            |
+| `npm run format`   | Format all files with Prettier                      |
+| `npm run format:check` | Check if files are properly formatted          |
+
+**IMPORTANT**: Always run `npm run build` after making changes to ensure the widget is updated in Figma.
 
 ## Project Architecture
 

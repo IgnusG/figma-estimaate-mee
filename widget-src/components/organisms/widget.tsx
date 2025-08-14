@@ -168,6 +168,7 @@ export function Widget() {
         votes={votes}
         showPokerResults={showPokerResults}
         onRevealCards={handleRevealCards}
+        onReplaceRandomCard={sessionControls.replaceRandomCard}
       />
     );
   }

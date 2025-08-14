@@ -2,12 +2,14 @@ const { widget } = figma;
 const { AutoLayout, Text } = widget;
 
 import { PlayingCard } from "../../utils/types";
+import { sortCards, getCardSymbol } from "../../utils/card-utils";
 
 export interface ParticipantBadgeProps {
   userName: string;
   hasVoted: boolean;
   showSyncIndicator?: boolean;
   cards?: PlayingCard[];
+  userId: string;
 }
 
 export function ParticipantBadge(props: ParticipantBadgeProps) {
@@ -28,6 +30,24 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
     return text;
   };
 
+  const handleCardClick = () => {
+    return new Promise<void>((resolve) => {
+      // Check if this is the current user clicking their own cards
+      if (
+        props.userId === figma.currentUser?.id &&
+        props.cards &&
+        props.cards.length > 0
+      ) {
+        const sortedCards = sortCards(props.cards);
+        const cardSymbols = sortedCards.map((card) => getCardSymbol(card));
+        figma.notify(`Your cards: ${cardSymbols.join(", ")}`, {
+          timeout: 4000,
+        });
+      }
+      resolve();
+    });
+  };
+
   if (props.cards && props.cards.length > 0) {
     return (
       <AutoLayout
@@ -41,8 +61,8 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
         <Text fontSize={12} fill="#FFFFFF" fontWeight="bold">
           {getDisplayText()}
         </Text>
-        <Text fontSize={12} fill="#FFFFFF">
-          🃏
+        <Text fontSize={12} fill="#FFFFFF" onClick={handleCardClick}>
+          🃏({props.cards?.length || 0})
         </Text>
       </AutoLayout>
     );

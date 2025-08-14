@@ -1,6 +1,9 @@
 import { SessionState, Participant, Vote, SyncedMapLike } from "../utils/types";
 import { debug } from "../utils/debug";
-import { addCardToParticipant } from "../utils/card-utils";
+import {
+  addCardToParticipant,
+  replaceRandomCard as replaceRandomCardUtil,
+} from "../utils/card-utils";
 
 export interface UseSessionStateReturn {
   sessionState: SessionState;
@@ -8,6 +11,7 @@ export interface UseSessionStateReturn {
   revealResults: () => void;
   resetSession: () => void;
   joinSession: () => void;
+  replaceRandomCard: () => void;
 }
 
 export function useSessionState(
@@ -177,11 +181,45 @@ export function useSessionState(
     }
   };
 
+  const replaceRandomCard = () => {
+    try {
+      const userId = figma.currentUser?.id;
+      if (!userId) return;
+
+      const participant = participants.get(userId);
+      if (
+        !participant ||
+        !participant.cards ||
+        participant.cards.length === 0
+      ) {
+        debug.log("No cards to replace for user:", userId);
+        return;
+      }
+
+      const updatedCards = replaceRandomCardUtil(participant.cards);
+      participants.set(userId, {
+        ...participant,
+        cards: updatedCards,
+      });
+
+      debug.log(
+        `Replaced random card for ${participant.userName}, still has ${updatedCards.length} cards`,
+      );
+      figma.notify(
+        `Replaced one card! You now have ${updatedCards.length} cards.`,
+        { timeout: 3000 },
+      );
+    } catch (error) {
+      debug.error("Error replacing random card:", error);
+    }
+  };
+
   return {
     sessionState,
     startSession,
     revealResults,
     resetSession,
     joinSession,
+    replaceRandomCard,
   };
 }
