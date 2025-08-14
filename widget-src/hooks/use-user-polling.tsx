@@ -55,7 +55,6 @@ export function useUserPolling(
             participants.set(user.id, {
               userId: user.id,
               userName: user.name || "Anonymous",
-              isSpectator: false,
               joinedAt: Date.now(),
             });
           }

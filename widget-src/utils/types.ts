@@ -7,7 +7,6 @@ export interface Vote {
 
 export interface SessionState {
   status: "waiting" | "voting" | "revealed";
-  facilitatorId: string;
   participants: string[];
   participantsSnapshot?: Participant[]; // Snapshot of participants when results revealed
 }
