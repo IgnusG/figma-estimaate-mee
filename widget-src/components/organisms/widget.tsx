@@ -116,20 +116,21 @@ export function Widget() {
     }
   });
 
-  const sessionControls = useSessionState(
-    sessionStateData,
-    setSessionStateData,
-    participants,
-    votes,
-    setShowPokerResults,
-  );
-
   // Custom function to add recent votes
   const addRecentVote = (userId: string, timestamp: number) => {
     setRecentVotes({ ...recentVotes, [userId]: timestamp });
   };
 
   const votingControls = useVoting(votes, count, setCount, addRecentVote);
+
+  const sessionControls = useSessionState(
+    sessionStateData,
+    setSessionStateData,
+    participants,
+    votes,
+    votingControls.groupedResults,
+    setShowPokerResults,
+  );
 
   // Reveal cards handler
   const handleRevealCards = () => {

@@ -5,7 +5,15 @@ import {
   HandEvaluation,
   PokerHand,
   PokerWinner,
+  VoteResult,
 } from "./types";
+import {
+  CARD_QUALITY_CONFIG,
+  CardQualityProbabilities,
+  CARD_TIERS,
+  SPECIAL_CARD_VALUES,
+  CardQualityCategory,
+} from "./card-quality-config";
 
 // Create a standard 52-card deck
 export function createDeck(): PlayingCard[] {
@@ -354,4 +362,197 @@ export function getPokerHandName(hand: PokerHand): string {
   };
 
   return handNames[hand];
+}
+
+// Consensus-based card quality functions
+
+// Analyze vote results to determine majority and consensus
+export function analyzeVoteConsensus(voteResults: VoteResult[]) {
+  if (voteResults.length === 0) {
+    return {
+      majority: null,
+      isPerfectConsensus: false,
+      isSpecialMajority: false,
+    };
+  }
+
+  // Sort by count to find majority (plurality)
+  const sortedResults = [...voteResults].sort((a, b) => b.count - a.count);
+  const topResult = sortedResults[0];
+
+  // Check for perfect consensus (only one vote option)
+  const isPerfectConsensus = voteResults.length === 1;
+
+  // Check if there's a clear majority (no ties at the top)
+  const hasOtherWithSameCount =
+    sortedResults.length > 1 && sortedResults[1].count === topResult.count;
+
+  const majority = hasOtherWithSameCount ? null : topResult;
+
+  // Check if majority is a special card
+  const isSpecialMajority =
+    majority && SPECIAL_CARD_VALUES.includes(majority.value as string);
+
+  return { majority, isPerfectConsensus, isSpecialMajority };
+}
+
+// Calculate distance between two numeric votes
+export function calculateVoteDistance(
+  userVote: number | string,
+  majorityVote: number | string,
+): number {
+  // Convert to numbers, return max distance if either is non-numeric
+  const userNum =
+    typeof userVote === "number" ? userVote : parseFloat(userVote as string);
+  const majorityNum =
+    typeof majorityVote === "number"
+      ? majorityVote
+      : parseFloat(majorityVote as string);
+
+  if (isNaN(userNum) || isNaN(majorityNum)) {
+    return Infinity; // Special cards have infinite distance from numeric votes
+  }
+
+  return Math.abs(userNum - majorityNum);
+}
+
+// Determine card quality category for a user based on their vote
+export function getCardQualityCategory(
+  userVote: number | string,
+  voteResults: VoteResult[],
+): { category: CardQualityCategory; reason: string } {
+  const { majority, isPerfectConsensus, isSpecialMajority } =
+    analyzeVoteConsensus(voteResults);
+
+  // Special card majority penalty - check this FIRST (overrides perfect consensus)
+  if (isSpecialMajority && SPECIAL_CARD_VALUES.includes(userVote as string)) {
+    return {
+      category: "specialCardPenalty",
+      reason:
+        "🚫 Special cards won majority! You lose 1 card and get 2 lower-quality replacements.",
+    };
+  }
+
+  // Perfect consensus - everyone voted the same (but not special cards)
+  if (isPerfectConsensus) {
+    return {
+      category: "perfectConsensus",
+      reason: "🎯 Perfect consensus! Everyone gets bonus cards!",
+    };
+  }
+
+  // No clear majority (tied votes)
+  if (!majority) {
+    return {
+      category: "noMajority",
+      reason: "🎲 No clear majority - fair random card distribution!",
+    };
+  }
+
+  // Check if user is special card voter (but special cards didn't win majority)
+  if (SPECIAL_CARD_VALUES.includes(userVote as string)) {
+    return {
+      category: "specialCardVoter",
+      reason: "❓ Special card vote - moderate card quality.",
+    };
+  }
+
+  // User voted for majority
+  if (userVote === majority.value) {
+    return {
+      category: "majorityVoter",
+      reason:
+        "✨ Great estimation! You voted with the majority - better card odds!",
+    };
+  }
+
+  // Calculate distance from majority for numeric votes
+  const distance = calculateVoteDistance(userVote, majority.value);
+
+  if (distance <= 1) {
+    return {
+      category: "closeToMajority",
+      reason: "👍 Close estimate! Decent card quality for you.",
+    };
+  } else {
+    return {
+      category: "farFromMajority",
+      reason: "🤔 Your estimate was a bit off - lower card odds this round.",
+    };
+  }
+}
+
+// Draw a card based on quality weights
+export function drawWeightedCard(
+  probabilities: CardQualityProbabilities,
+): PlayingCard {
+  const random = Math.random() * 100;
+  let tier: "high" | "medium" | "low";
+
+  if (random < probabilities.high) {
+    tier = "high";
+  } else if (random < probabilities.high + probabilities.medium) {
+    tier = "medium";
+  } else {
+    tier = "low";
+  }
+
+  // Get random card from the selected tier
+  const tierCards = CARD_TIERS[tier];
+  const randomRank = tierCards[Math.floor(Math.random() * tierCards.length)];
+
+  // Get random suit
+  const suits: Suit[] = ["clubs", "diamonds", "hearts", "spades"];
+  const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+
+  return {
+    suit: randomSuit,
+    rank: randomRank as Rank,
+    id: `${randomRank}-${randomSuit}`,
+  };
+}
+
+// Add card to participant with consensus-based quality (replaces addCardToParticipant)
+export function addCardToParticipantWithQuality(
+  existingCards: PlayingCard[] = [],
+  userVote: number | string,
+  voteResults: VoteResult[],
+): { cards: PlayingCard[]; reason: string; isSpecialPenalty: boolean } {
+  const { category, reason } = getCardQualityCategory(userVote, voteResults);
+  const probabilities = CARD_QUALITY_CONFIG[category];
+
+  // Handle special card penalty (lose 1 card, get 2 lower quality cards)
+  if (category === "specialCardPenalty") {
+    let updatedCards = [...existingCards];
+
+    // Remove one random card if they have any
+    if (updatedCards.length > 0) {
+      const randomIndex = Math.floor(Math.random() * updatedCards.length);
+      updatedCards.splice(randomIndex, 1);
+    }
+
+    // Add 2 cards with penalty probabilities
+    updatedCards.push(drawWeightedCard(probabilities));
+    updatedCards.push(drawWeightedCard(probabilities));
+
+    // Enforce max 5 cards
+    if (updatedCards.length > 5) {
+      updatedCards = updatedCards.slice(-5);
+    }
+
+    return { cards: updatedCards, reason, isSpecialPenalty: true };
+  }
+
+  // Normal card assignment
+  const newCard = drawWeightedCard(probabilities);
+  const updatedCards = [...existingCards];
+
+  // If already at max capacity, remove a random card
+  if (updatedCards.length >= 5) {
+    const randomIndex = Math.floor(Math.random() * updatedCards.length);
+    updatedCards.splice(randomIndex, 1);
+  }
+
+  updatedCards.push(newCard);
+  return { cards: updatedCards, reason, isSpecialPenalty: false };
 }

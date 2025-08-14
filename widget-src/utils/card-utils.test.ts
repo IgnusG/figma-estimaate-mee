@@ -4,12 +4,16 @@ import {
   shuffleDeck,
   drawRandomCard,
   addCardToParticipant,
+  addCardToParticipantWithQuality,
   replaceRandomCard,
   sortCards,
   getCardSymbol,
   evaluatePokerHand,
   determinePokerWinner,
   getPokerHandName,
+  analyzeVoteConsensus,
+  calculateVoteDistance,
+  getCardQualityCategory,
 } from "./card-utils";
 import { PlayingCard, Suit, Rank } from "./types";
 
@@ -532,6 +536,150 @@ describe("Card Utils", () => {
       expect(getPokerHandName("two-pair")).toBe("Two Pair");
       expect(getPokerHandName("one-pair")).toBe("One Pair");
       expect(getPokerHandName("high-card")).toBe("High Card");
+    });
+  });
+
+  describe("Consensus-based card quality", () => {
+    describe("analyzeVoteConsensus", () => {
+      it("should detect perfect consensus", () => {
+        const voteResults = [{ value: 5, count: 3, participants: [] }];
+        const result = analyzeVoteConsensus(voteResults);
+        expect(result.isPerfectConsensus).toBe(true);
+        expect(result.majority?.value).toBe(5);
+      });
+
+      it("should detect clear majority", () => {
+        const voteResults = [
+          { value: 5, count: 3, participants: [] },
+          { value: 8, count: 1, participants: [] },
+        ];
+        const result = analyzeVoteConsensus(voteResults);
+        expect(result.isPerfectConsensus).toBe(false);
+        expect(result.majority?.value).toBe(5);
+      });
+
+      it("should detect ties (no majority)", () => {
+        const voteResults = [
+          { value: 5, count: 2, participants: [] },
+          { value: 8, count: 2, participants: [] },
+        ];
+        const result = analyzeVoteConsensus(voteResults);
+        expect(result.majority).toBeNull();
+      });
+
+      it("should detect special card majority", () => {
+        const voteResults = [
+          { value: "🤷‍♀️", count: 3, participants: [] },
+          { value: 5, count: 1, participants: [] },
+        ];
+        const result = analyzeVoteConsensus(voteResults);
+        expect(result.isSpecialMajority).toBe(true);
+      });
+    });
+
+    describe("calculateVoteDistance", () => {
+      it("should calculate distance for numeric votes", () => {
+        expect(calculateVoteDistance(5, 8)).toBe(3);
+        expect(calculateVoteDistance(13, 8)).toBe(5);
+        expect(calculateVoteDistance(3, 3)).toBe(0);
+      });
+
+      it("should return infinity for special cards", () => {
+        expect(calculateVoteDistance("🤷‍♀️", 5)).toBe(Infinity);
+        expect(calculateVoteDistance(5, "☕")).toBe(Infinity);
+      });
+    });
+
+    describe("getCardQualityCategory", () => {
+      it("should return perfectConsensus for unanimous votes", () => {
+        const voteResults = [{ value: 5, count: 4, participants: [] }];
+        const result = getCardQualityCategory(5, voteResults);
+        expect(result.category).toBe("perfectConsensus");
+      });
+
+      it("should return majorityVoter for majority votes", () => {
+        const voteResults = [
+          { value: 5, count: 3, participants: [] },
+          { value: 8, count: 1, participants: [] },
+        ];
+        const result = getCardQualityCategory(5, voteResults);
+        expect(result.category).toBe("majorityVoter");
+      });
+
+      it("should return closeToMajority for votes within ±1", () => {
+        const voteResults = [
+          { value: 5, count: 3, participants: [] },
+          { value: 8, count: 1, participants: [] },
+        ];
+        const result = getCardQualityCategory(4, voteResults); // 4 is 1 away from 5
+        expect(result.category).toBe("closeToMajority");
+      });
+
+      it("should return farFromMajority for votes ±2+ away", () => {
+        const voteResults = [
+          { value: 5, count: 3, participants: [] },
+          { value: 8, count: 1, participants: [] },
+        ];
+        const result = getCardQualityCategory(2, voteResults); // 2 is 3 away from 5
+        expect(result.category).toBe("farFromMajority");
+      });
+
+      it("should return specialCardPenalty for special card majority", () => {
+        const voteResults = [
+          { value: "🤷‍♀️", count: 3, participants: [] },
+          { value: 5, count: 1, participants: [] },
+        ];
+        const result = getCardQualityCategory("🤷‍♀️", voteResults);
+        expect(result.category).toBe("specialCardPenalty");
+      });
+
+      it("should return specialCardPenalty for solo special card vote (overrides perfect consensus)", () => {
+        const voteResults = [{ value: "🤷‍♀️", count: 1, participants: [] }];
+        const result = getCardQualityCategory("🤷‍♀️", voteResults);
+        expect(result.category).toBe("specialCardPenalty");
+        expect(result.reason).toContain("Special cards won majority");
+      });
+
+      it("should return specialCardVoter for special cards when not majority", () => {
+        const voteResults = [
+          { value: 5, count: 3, participants: [] },
+          { value: "🤷‍♀️", count: 1, participants: [] },
+        ];
+        const result = getCardQualityCategory("🤷‍♀️", voteResults);
+        expect(result.category).toBe("specialCardVoter");
+      });
+    });
+
+    describe("addCardToParticipantWithQuality", () => {
+      it("should add cards with quality-based probabilities", () => {
+        const voteResults = [
+          { value: 5, count: 3, participants: [] },
+          { value: 8, count: 1, participants: [] },
+        ];
+        const result = addCardToParticipantWithQuality([], 5, voteResults);
+        expect(result.cards).toHaveLength(1);
+        expect(result.reason).toContain("Great estimation");
+        expect(result.isSpecialPenalty).toBe(false);
+      });
+
+      it("should handle special card penalty", () => {
+        const existingCards = [
+          { suit: "hearts", rank: 2, id: "2-hearts" },
+          { suit: "clubs", rank: 3, id: "3-clubs" },
+        ];
+        const voteResults = [
+          { value: "🤷‍♀️", count: 3, participants: [] },
+          { value: 5, count: 1, participants: [] },
+        ];
+        const result = addCardToParticipantWithQuality(
+          existingCards,
+          "🤷‍♀️",
+          voteResults,
+        );
+        expect(result.cards).toHaveLength(3); // Lost 1, gained 2
+        expect(result.isSpecialPenalty).toBe(true);
+        expect(result.reason).toContain("Special cards won majority");
+      });
     });
   });
 });
