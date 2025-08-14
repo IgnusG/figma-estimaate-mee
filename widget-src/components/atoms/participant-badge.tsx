@@ -1,7 +1,7 @@
 const { widget } = figma;
 const { AutoLayout, Text } = widget;
 
-import { PlayingCard } from "../../utils/types";
+import { PlayingCard, Vote, SyncedMapLike } from "../../utils/types";
 import { sortCards, getCardSymbol } from "../../utils/card-utils";
 
 export interface ParticipantBadgeProps {
@@ -10,6 +10,7 @@ export interface ParticipantBadgeProps {
   showSyncIndicator?: boolean;
   cards?: PlayingCard[];
   userId: string;
+  votes: SyncedMapLike<Vote>;
 }
 
 export function ParticipantBadge(props: ParticipantBadgeProps) {
@@ -48,6 +49,25 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
     });
   };
 
+  const handleBadgeClick = () => {
+    return new Promise<void>((resolve) => {
+      // Check if this is the current user clicking their own badge
+      if (props.userId === figma.currentUser?.id) {
+        const userVote = props.votes.get(props.userId);
+        if (userVote) {
+          figma.notify(`Your estimate: ${userVote.value}`, {
+            timeout: 3000,
+          });
+        } else {
+          figma.notify("You haven't voted yet", {
+            timeout: 3000,
+          });
+        }
+      }
+      resolve();
+    });
+  };
+
   if (props.cards && props.cards.length > 0) {
     return (
       <AutoLayout
@@ -58,11 +78,16 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
         cornerRadius={12}
         horizontalAlignItems="center"
       >
-        <Text fontSize={12} fill="#FFFFFF" fontWeight="bold">
+        <Text
+          fontSize={12}
+          fill="#FFFFFF"
+          fontWeight="bold"
+          onClick={handleBadgeClick}
+        >
           {getDisplayText()}
         </Text>
         <Text fontSize={12} fill="#FFFFFF" onClick={handleCardClick}>
-          🃏({props.cards?.length || 0})
+          🃏
         </Text>
       </AutoLayout>
     );
@@ -74,7 +99,12 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
       fill={getBackgroundColor()}
       cornerRadius={12}
     >
-      <Text fontSize={12} fill="#FFFFFF" fontWeight="bold">
+      <Text
+        fontSize={12}
+        fill="#FFFFFF"
+        fontWeight="bold"
+        onClick={handleBadgeClick}
+      >
         {getDisplayText()}
       </Text>
     </AutoLayout>

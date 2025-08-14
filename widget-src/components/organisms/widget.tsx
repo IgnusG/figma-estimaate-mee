@@ -282,6 +282,7 @@ export function Widget() {
         currentVotes={votes.size}
         totalParticipants={totalEligibleVoters}
         participants={participantStatusData}
+        votes={votes}
       />
 
       {/* Session Controls */}

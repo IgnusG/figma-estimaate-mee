@@ -3,7 +3,7 @@ const { AutoLayout } = widget;
 
 import { VoteCounter } from "../atoms/vote-counter";
 import { ParticipantBadge } from "../atoms/participant-badge";
-import { PlayingCard } from "../../utils/types";
+import { PlayingCard, Vote, SyncedMapLike } from "../../utils/types";
 
 export interface ParticipantStatusProps {
   currentVotes: number;
@@ -15,6 +15,7 @@ export interface ParticipantStatusProps {
     showSyncIndicator?: boolean;
     cards?: PlayingCard[];
   }>;
+  votes: SyncedMapLike<Vote>;
 }
 
 export function ParticipantStatus(props: ParticipantStatusProps) {
@@ -38,6 +39,7 @@ export function ParticipantStatus(props: ParticipantStatusProps) {
             hasVoted={participant.hasVoted}
             showSyncIndicator={participant.showSyncIndicator}
             cards={participant.cards}
+            votes={props.votes}
           />
         ))}
       </AutoLayout>
