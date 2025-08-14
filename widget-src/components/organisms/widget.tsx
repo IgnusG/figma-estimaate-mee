@@ -303,7 +303,10 @@ export function Widget() {
       />
 
       {/* Session Controls */}
-      <SessionControls onRevealResults={sessionControls.revealResults} />
+      <SessionControls
+        onRevealResults={sessionControls.revealResults}
+        disableReveal={votes.size === 0}
+      />
 
       <CardGrid
         cards={[...STORY_POINT_CARDS, ...JOKER_CARDS]}
