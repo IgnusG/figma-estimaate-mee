@@ -68,6 +68,15 @@ export function useSessionState(
       // Any participant can reveal results
       const userId = figma.currentUser?.id;
       if (userId) {
+        // Prevent revealing results if no votes exist
+        if (votes.size === 0) {
+          debug.log("Cannot reveal results - no votes cast");
+          figma.notify("Cannot reveal results - no votes have been cast yet!", {
+            timeout: 3000,
+          });
+          return;
+        }
+
         debug.log("Revealing results");
 
         // Distribute cards to participants who voted (only if poker is enabled)

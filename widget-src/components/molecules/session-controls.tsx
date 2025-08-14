@@ -7,6 +7,7 @@ export interface SessionControlsProps {
   onRevealResults: () => void;
   onResetSession?: () => void;
   showResetButton?: boolean;
+  disableReveal?: boolean;
 }
 
 export function SessionControls(props: SessionControlsProps) {
@@ -17,6 +18,7 @@ export function SessionControls(props: SessionControlsProps) {
         variant="success"
         size="medium"
         onClick={props.onRevealResults}
+        disabled={props.disableReveal}
       />
       {props.showResetButton && props.onResetSession && (
         <ActionButton

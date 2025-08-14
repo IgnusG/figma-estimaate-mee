@@ -6,13 +6,19 @@ export interface ActionButtonProps {
   onClick: () => void;
   variant?: "primary" | "secondary" | "success";
   size?: "small" | "medium" | "large";
+  disabled?: boolean;
 }
 
 export function ActionButton(props: ActionButtonProps) {
   const variant = props.variant || "primary";
   const size = props.size || "medium";
+  const disabled = props.disabled || false;
 
   const getVariantStyles = () => {
+    if (disabled) {
+      return { fill: "#CCCCCC" };
+    }
+
     switch (variant) {
       case "success":
         return { fill: "#28A745" };
@@ -53,10 +59,15 @@ export function ActionButton(props: ActionButtonProps) {
       padding={sizeStyles.padding}
       fill={variantStyles.fill}
       cornerRadius={6}
-      onClick={props.onClick}
+      onClick={disabled ? undefined : props.onClick}
       horizontalAlignItems="center"
+      opacity={disabled ? 0.6 : 1}
     >
-      <Text fontSize={sizeStyles.fontSize} fill="#FFFFFF" fontWeight="bold">
+      <Text
+        fontSize={sizeStyles.fontSize}
+        fill={disabled ? "#999999" : "#FFFFFF"}
+        fontWeight="bold"
+      >
         {props.text}
       </Text>
     </AutoLayout>
