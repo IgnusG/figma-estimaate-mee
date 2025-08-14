@@ -50,7 +50,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
         mockSetCount
       );
 
-      handleVoteUser1(5);
+      handleVoteUser1("user-1", 5);
 
       // Verify all users see User 1's vote
       expect(mockVotesUser1.get("user-1")?.value).toBe(5);
@@ -68,11 +68,11 @@ describe("useVoting hook - Multi-user scenarios", () => {
         mockSetCount
       );
 
-      handleVoteUser2(8);
+      handleVoteUser2("user-2", 8);
       expect(mockVotesUser1.get("user-2")?.value).toBe(8);
 
       // User 2 deselects
-      handleVoteUser2(undefined);
+      handleVoteUser2("user-2", undefined);
 
       // Verify all users see the deselection
       expect(mockVotesUser1.get("user-2")).toBeUndefined();
@@ -104,9 +104,9 @@ describe("useVoting hook - Multi-user scenarios", () => {
       );
 
       // All users vote
-      handleVoteUser1(3);
-      handleVoteUser2(5);
-      handleVoteUser3(8);
+      handleVoteUser1("user-1", 3);
+      handleVoteUser2("user-2", 5);
+      handleVoteUser3("user-3", 8);
 
       expect(sharedVotesMap.size).toBe(3);
       expect(mockVotesUser1.get("user-1")?.value).toBe(3);
@@ -114,7 +114,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       expect(mockVotesUser1.get("user-3")?.value).toBe(8);
 
       // User 2 deselects their vote
-      handleVoteUser2(undefined);
+      handleVoteUser2("user-2", undefined);
 
       expect(sharedVotesMap.size).toBe(2);
       expect(mockVotesUser1.get("user-1")?.value).toBe(3);
@@ -122,15 +122,15 @@ describe("useVoting hook - Multi-user scenarios", () => {
       expect(mockVotesUser1.get("user-3")?.value).toBe(8);
 
       // User 2 re-votes with a different value
-      handleVoteUser2(13);
+      handleVoteUser2("user-2", 13);
 
       expect(sharedVotesMap.size).toBe(3);
       expect(mockVotesUser2.get("user-2")?.value).toBe(13);
 
       // All users deselect
-      handleVoteUser1(undefined);
-      handleVoteUser2(undefined);
-      handleVoteUser3(undefined);
+      handleVoteUser1("user-1", undefined);
+      handleVoteUser2("user-2", undefined);
+      handleVoteUser3("user-3", undefined);
 
       expect(sharedVotesMap.size).toBe(0);
     });
@@ -151,17 +151,17 @@ describe("useVoting hook - Multi-user scenarios", () => {
       );
 
       // Rapid changes from User 1
-      handleVoteUser1(1);
-      handleVoteUser1(undefined);
-      handleVoteUser1(2);
-      handleVoteUser1(3);
-      handleVoteUser1(undefined);
-      handleVoteUser1(5);
+      handleVoteUser1("user-1", 1);
+      handleVoteUser1("user-1", undefined);
+      handleVoteUser1("user-1", 2);
+      handleVoteUser1("user-1", 3);
+      handleVoteUser1("user-1", undefined);
+      handleVoteUser1("user-1", 5);
 
       // Concurrent changes from User 2
-      handleVoteUser2(8);
-      handleVoteUser2(undefined);
-      handleVoteUser2(13);
+      handleVoteUser2("user-2", 8);
+      handleVoteUser2("user-2", undefined);
+      handleVoteUser2("user-2", 13);
 
       // Final state check
       expect(mockVotesUser1.get("user-1")?.value).toBe(5);
@@ -185,15 +185,15 @@ describe("useVoting hook - Multi-user scenarios", () => {
       );
 
       // Both users vote for the same value
-      handleVoteUser1(5);
-      handleVoteUser2(5);
+      handleVoteUser1("user-1", 5);
+      handleVoteUser2("user-2", 5);
 
       expect(mockVotesUser1.get("user-1")?.value).toBe(5);
       expect(mockVotesUser1.get("user-2")?.value).toBe(5);
       expect(sharedVotesMap.size).toBe(2);
 
       // One user deselects
-      handleVoteUser1(undefined);
+      handleVoteUser1("user-1", undefined);
 
       // Other user's vote should remain
       expect(mockVotesUser1.get("user-1")).toBeUndefined();
@@ -217,25 +217,25 @@ describe("useVoting hook - Multi-user scenarios", () => {
       );
 
       // User 1 selects a joker card
-      handleVoteUser1("?");
+      handleVoteUser1("user-1", "?");
       expect(mockVotesUser2.get("user-1")?.value).toBe("?");
 
       // User 2 selects a different joker card
-      handleVoteUser2("∞");
+      handleVoteUser2("user-2", "∞");
       expect(mockVotesUser1.get("user-2")?.value).toBe("∞");
 
       // User 1 deselects
-      handleVoteUser1(undefined);
+      handleVoteUser1("user-1", undefined);
       expect(mockVotesUser2.get("user-1")).toBeUndefined();
       expect(mockVotesUser2.get("user-2")?.value).toBe("∞");
 
       // User 1 selects a regular card
-      handleVoteUser1(8);
+      handleVoteUser1("user-1", 8);
       expect(mockVotesUser2.get("user-1")?.value).toBe(8);
 
       // Both deselect
-      handleVoteUser1(undefined);
-      handleVoteUser2(undefined);
+      handleVoteUser1("user-1", undefined);
+      handleVoteUser2("user-2", undefined);
       expect(sharedVotesMap.size).toBe(0);
     });
   });
@@ -263,7 +263,7 @@ describe("useVoting hook - Multi-user scenarios", () => {
       });
 
       global.figma = { currentUser: mockUsers.user1 } as any;
-      const voting1 = useVoting(mockVotesUser1, "user-1", 0, vi.fn());
+      const voting1 = useVoting(mockVotesUser1, 0, vi.fn());
       
       // Check initial grouped results
       expect(voting1.groupedResults).toHaveLength(2);
@@ -272,10 +272,10 @@ describe("useVoting hook - Multi-user scenarios", () => {
       expect(fiveVotes?.participants).toHaveLength(2);
 
       // User 1 deselects
-      voting1.handleVote(undefined);
+      voting1.handleVote("user-1", undefined);
 
       // Re-fetch voting state to get updated results
-      const voting1Updated = useVoting(mockVotesUser1, "user-1", 0, vi.fn());
+      const voting1Updated = useVoting(mockVotesUser1, 0, vi.fn());
       
       // Check updated grouped results
       const fiveVotesUpdated = voting1Updated.groupedResults.find(r => r.value === 5);
@@ -318,8 +318,8 @@ describe("useVoting hook - Multi-user scenarios", () => {
       expect(results1[0].count).toBe(2);
 
       // Both users deselect
-      handleVoteUser1(undefined);
-      handleVoteUser2(undefined);
+      handleVoteUser1("user-1", undefined);
+      handleVoteUser2("user-2", undefined);
 
       // Re-fetch to get updated results
       const { groupedResults: resultsAfter } = useVoting(
@@ -342,14 +342,14 @@ describe("useVoting hook - Multi-user scenarios", () => {
       );
 
       // User votes
-      handleVoteUser1(5);
+      handleVoteUser1("user-1", 5);
       expect(sharedVotesMap.size).toBe(1);
 
       // Simulate connection issue by making figma.currentUser null
       global.figma.currentUser = null as any;
 
       // Try to deselect with null user
-      handleVoteUser1(undefined);
+      handleVoteUser1("user-1", undefined);
 
       // Vote should still be cleared even with null currentUser
       expect(sharedVotesMap.size).toBe(0);

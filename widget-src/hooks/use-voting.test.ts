@@ -26,7 +26,7 @@ describe("useVoting hook", () => {
       keys: () => Array.from(votesData.keys()),
       values: () => Array.from(votesData.values()),
       entries: () => Array.from(votesData.entries()),
-      size: votesData.size,
+      get size() { return votesData.size; },
     } as SyncedMapLike<Vote>;
 
     mockSetCount = vi.fn();
@@ -129,11 +129,7 @@ describe("useVoting hook", () => {
 
       // After voting
       handleVote("user-123", 13);
-      const { currentUserVote: voteAfter } = useVoting(
-        mockVotes,
-        0,
-        mockSetCount
-      );
+      const voteAfter = mockVotes.get("user-123");
       expect(voteAfter?.value).toBe(13);
     });
 
@@ -149,7 +145,7 @@ describe("useVoting hook", () => {
       const { handleVote } = useVoting(errorVotes, 0, mockSetCount);
 
       // Should not throw when delete fails
-      expect(() => handleVote(undefined)).not.toThrow();
+      expect(() => handleVote("user-123", undefined)).not.toThrow();
       // The error is now logged via debug.error which won't show unless debug is enabled
       // Just verify the count was still updated despite the error
       expect(mockSetCount).toHaveBeenCalledWith(1);
@@ -194,13 +190,12 @@ describe("useVoting hook", () => {
     it("should handle missing currentUserId", () => {
       const { handleVote, currentUserVote, groupedResults } = useVoting(
         mockVotes,
-        "",
         0,
         mockSetCount
       );
 
-      // Should return noop function
-      handleVote("user-123", 5);
+      // Should return noop function when userId is empty
+      handleVote("", 5);
       expect(mockSetCount).not.toHaveBeenCalled();
       expect(currentUserVote).toBeUndefined();
       expect(groupedResults).toEqual([]);
