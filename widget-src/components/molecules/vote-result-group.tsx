@@ -38,18 +38,25 @@ export function VoteResultGroup(props: VoteResultGroupProps) {
     >
       <AutoLayout
         direction="horizontal"
-        spacing={12}
+        spacing={16}
         horizontalAlignItems="center"
-        width="fill-parent"
+        width="hug-contents"
         overflow="visible"
       >
-        <AutoLayout direction="vertical" spacing={6} width="fill-parent" overflow="visible">
-          <AutoLayout direction="horizontal" spacing={12} horizontalAlignItems="center" width="fill-parent" overflow="visible">
-            <Text fontSize={28} fontWeight="bold" fill={style.accent}>
-              {props.value}
-            </Text>
+        <AutoLayout direction="vertical" spacing={8} width="fill-parent" overflow="visible">
+          <AutoLayout direction="horizontal" spacing={16} horizontalAlignItems="center" width="hug-contents" overflow="visible">
             <AutoLayout
-              padding={{ horizontal: 8, vertical: 4 }}
+              direction="horizontal"
+              horizontalAlignItems="center"
+              verticalAlignItems="center"
+              width="hug-contents"
+            >
+              <Text fontSize={28} fontWeight="bold" fill={style.accent}>
+                {props.value}
+              </Text>
+            </AutoLayout>
+            <AutoLayout
+              padding={{ horizontal: 12, vertical: 6 }}
               fill={style.accent}
               cornerRadius={12}
               horizontalAlignItems="center"

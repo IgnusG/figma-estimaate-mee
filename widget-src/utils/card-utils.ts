@@ -82,6 +82,20 @@ export function getCardSymbol(card: PlayingCard): string {
   return `${card.rank}${suitSymbols[card.suit]}`;
 }
 
+// Get card display symbol with consistent formatting for poker results
+export function getCardSymbolFormatted(card: PlayingCard): string {
+  const suitSymbols: Record<Suit, string> = {
+    "clubs": "♣",
+    "diamonds": "♦",
+    "hearts": "♥",
+    "spades": "♠"
+  };
+  
+  // Use fixed-width formatting for more consistent appearance
+  const rank = card.rank.toString().padStart(2, ' ');
+  return `${rank}${suitSymbols[card.suit]}`;
+}
+
 // Convert rank to numeric value for poker evaluation
 function getRankValue(rank: Rank): number {
   if (typeof rank === "number") return rank;
@@ -125,14 +139,8 @@ function countRanks(ranks: number[]): Record<number, number> {
 
 // Evaluate the best 5-card poker hand from a collection of cards
 export function evaluatePokerHand(cards: PlayingCard[]): HandEvaluation {
-  // If less than 5 cards, pad with lowest possible values for evaluation
-  const evaluationCards = [...cards];
-  while (evaluationCards.length < 5) {
-    evaluationCards.push({ suit: "clubs", rank: 2, id: `dummy-${evaluationCards.length}` });
-  }
-  
-  // Take only the first 5 cards for evaluation (could be improved to check all combinations)
-  const hand = evaluationCards.slice(0, 5);
+  // For fewer than 5 cards, only evaluate what we actually have
+  const hand = cards.length >= 5 ? cards.slice(0, 5) : [...cards];
   const ranks = hand.map(card => getRankValue(card.rank));
   const suits = hand.map(card => card.suit);
   
@@ -140,29 +148,50 @@ export function evaluatePokerHand(cards: PlayingCard[]): HandEvaluation {
   const counts = Object.keys(rankCounts).map(key => rankCounts[parseInt(key)]).sort((a: number, b: number) => b - a);
   const uniqueRanks = Object.keys(rankCounts).map(Number).sort((a, b) => b - a);
   
-  const isFlushHand = isFlush(suits);
-  const isStraightHand = isStraight(ranks);
+  const isFlushHand = hand.length >= 5 && isFlush(suits);
+  const isStraightHand = hand.length >= 5 && isStraight(ranks);
   
-  // Royal flush: A, K, Q, J, 10 of same suit
-  if (isFlushHand && isStraightHand && uniqueRanks[0] === 14 && uniqueRanks[1] === 13) {
-    return {
-      hand: "royal-flush",
-      rank: 10,
-      cards: hand
-    };
+  // Only check for 5-card hands (flush, straight, etc.) if we have 5 cards
+  if (hand.length >= 5) {
+    // Royal flush: A, K, Q, J, 10 of same suit
+    if (isFlushHand && isStraightHand && uniqueRanks[0] === 14 && uniqueRanks[1] === 13) {
+      return {
+        hand: "royal-flush",
+        rank: 10,
+        cards: hand
+      };
+    }
+    
+    // Straight flush
+    if (isFlushHand && isStraightHand) {
+      return {
+        hand: "straight-flush",
+        rank: 9,
+        cards: hand
+      };
+    }
+    
+    // Flush
+    if (isFlushHand) {
+      return {
+        hand: "flush",
+        rank: 6,
+        cards: hand
+      };
+    }
+    
+    // Straight
+    if (isStraightHand) {
+      return {
+        hand: "straight",
+        rank: 5,
+        cards: hand
+      };
+    }
   }
   
-  // Straight flush
-  if (isFlushHand && isStraightHand) {
-    return {
-      hand: "straight-flush",
-      rank: 9,
-      cards: hand
-    };
-  }
-  
-  // Four of a kind
-  if (counts[0] === 4) {
+  // Four of a kind (needs at least 4 cards)
+  if (hand.length >= 4 && counts[0] === 4) {
     return {
       hand: "four-of-a-kind",
       rank: 8,
@@ -170,8 +199,8 @@ export function evaluatePokerHand(cards: PlayingCard[]): HandEvaluation {
     };
   }
   
-  // Full house
-  if (counts[0] === 3 && counts[1] === 2) {
+  // Full house (needs exactly 5 cards)
+  if (hand.length === 5 && counts[0] === 3 && counts[1] === 2) {
     return {
       hand: "full-house",
       rank: 7,
@@ -179,26 +208,8 @@ export function evaluatePokerHand(cards: PlayingCard[]): HandEvaluation {
     };
   }
   
-  // Flush
-  if (isFlushHand) {
-    return {
-      hand: "flush",
-      rank: 6,
-      cards: hand
-    };
-  }
-  
-  // Straight
-  if (isStraightHand) {
-    return {
-      hand: "straight",
-      rank: 5,
-      cards: hand
-    };
-  }
-  
-  // Three of a kind
-  if (counts[0] === 3) {
+  // Three of a kind (needs at least 3 cards)
+  if (hand.length >= 3 && counts[0] === 3) {
     return {
       hand: "three-of-a-kind",
       rank: 4,
@@ -206,8 +217,8 @@ export function evaluatePokerHand(cards: PlayingCard[]): HandEvaluation {
     };
   }
   
-  // Two pair
-  if (counts[0] === 2 && counts[1] === 2) {
+  // Two pair (needs at least 4 cards)
+  if (hand.length >= 4 && counts[0] === 2 && counts[1] === 2) {
     return {
       hand: "two-pair",
       rank: 3,
@@ -215,8 +226,8 @@ export function evaluatePokerHand(cards: PlayingCard[]): HandEvaluation {
     };
   }
   
-  // One pair
-  if (counts[0] === 2) {
+  // One pair (needs at least 2 cards)
+  if (hand.length >= 2 && counts[0] === 2) {
     return {
       hand: "one-pair",
       rank: 2,
