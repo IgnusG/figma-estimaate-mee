@@ -1,7 +1,13 @@
-import { SessionState, Participant, Vote, SyncedMapLike } from "../utils/types";
+import {
+  SessionState,
+  Participant,
+  Vote,
+  SyncedMapLike,
+  VoteResult,
+} from "../utils/types";
 import { debug } from "../utils/debug";
 import {
-  addCardToParticipant,
+  addCardToParticipantWithQuality,
   replaceRandomCard as replaceRandomCardUtil,
 } from "../utils/card-utils";
 
@@ -19,6 +25,7 @@ export function useSessionState(
   setSessionState: (state: SessionState) => void,
   participants: SyncedMapLike<Participant>,
   votes: SyncedMapLike<Vote>,
+  voteResults: VoteResult[],
   setShowPokerResults?: (show: boolean) => void,
 ): UseSessionStateReturn {
   const startSession = () => {
@@ -62,21 +69,34 @@ export function useSessionState(
       if (userId) {
         debug.log("Revealing results");
 
-        // Distribute cards to participants who voted first
+        // Distribute cards to participants who voted with consensus-based quality
         const voterIds = votes.keys();
-        debug.log("Distributing cards to voters:", voterIds);
+        debug.log("Distributing consensus-based cards to voters:", voterIds);
 
         for (const voterId of voterIds) {
           const participant = participants.get(voterId);
-          if (participant) {
-            const updatedCards = addCardToParticipant(participant.cards);
+          const vote = votes.get(voterId);
+          if (participant && vote) {
+            const { cards: updatedCards, reason } =
+              addCardToParticipantWithQuality(
+                participant.cards,
+                vote.value,
+                voteResults,
+              );
+
             participants.set(voterId, {
               ...participant,
               cards: updatedCards,
             });
+
             debug.log(
-              `Added card to ${participant.userName}, now has ${updatedCards.length} cards`,
+              `Added card to ${participant.userName} (voted ${vote.value}), now has ${updatedCards.length} cards - ${reason}`,
             );
+
+            // Show personalized notification to user
+            if (figma.currentUser?.id === voterId) {
+              figma.notify(reason, { timeout: 5000 });
+            }
           }
         }
 
@@ -205,7 +225,7 @@ export function useSessionState(
         participant.cards.length === 0
       ) {
         debug.log("No cards to replace for user:", userId);
-        figma.notify("You don't have any cards to replace.", { timeout: 3000 });
+        figma.notify("You don't have any cards to replace.", { timeout: 5000 });
         return;
       }
 
@@ -214,7 +234,7 @@ export function useSessionState(
       if (replacementsUsed >= 1) {
         figma.notify(
           "You can only replace one card per turn. Wait for the next round!",
-          { timeout: 4000 },
+          { timeout: 5000 },
         );
         return;
       }
@@ -231,7 +251,7 @@ export function useSessionState(
       );
       figma.notify(
         `Replaced one card! You now have ${updatedCards.length} cards.`,
-        { timeout: 3000 },
+        { timeout: 5000 },
       );
     } catch (error) {
       debug.error("Error replacing random card:", error);
