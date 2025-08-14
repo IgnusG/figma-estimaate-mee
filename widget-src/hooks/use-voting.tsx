@@ -17,6 +17,12 @@ export function useVoting(
 
   const handleVote = (currentUserId: string, value: number | string | undefined) => {
     try {
+      // Validate currentUserId
+      if (!currentUserId || currentUserId.trim() === "") {
+        debug.log("Invalid userId provided, skipping vote");
+        return;
+      }
+
       // Only use the currentUserId argument - no fallback
       const userId = currentUserId;
       const userName = figma.currentUser?.name || "Anonymous";

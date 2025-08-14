@@ -1,10 +1,14 @@
 const { widget } = figma;
 const { AutoLayout, Text } = widget;
 
+import { PlayingCard } from "../../utils/types";
+import { sortCards, getCardSymbol } from "../../utils/card-utils";
+
 export interface ParticipantBadgeProps {
   userName: string;
   hasVoted: boolean;
   showSyncIndicator?: boolean;
+  cards?: PlayingCard[];
 }
 
 export function ParticipantBadge(props: ParticipantBadgeProps) {
@@ -14,9 +18,28 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
   };
 
   const getDisplayText = () => {
-    if (props.hasVoted && props.showSyncIndicator) return `${props.userName} ⚡`;
-    if (props.hasVoted) return `${props.userName} ✓`;
-    return props.userName;
+    let text = props.userName;
+    
+    if (props.hasVoted && props.showSyncIndicator) {
+      text += " ⚡";
+    } else if (props.hasVoted) {
+      text += " ✓";
+    }
+    
+    // Add card indicator if user has cards
+    if (props.cards && props.cards.length > 0) {
+      text += " 🃏";
+    }
+    
+    return text;
+  };
+
+  const getTooltipText = () => {
+    if (!props.cards || props.cards.length === 0) return "";
+    
+    const sortedCards = sortCards(props.cards);
+    const cardSymbols = sortedCards.map(card => getCardSymbol(card));
+    return `Cards: ${cardSymbols.join(", ")}`;
   };
 
   return (
@@ -24,6 +47,7 @@ export function ParticipantBadge(props: ParticipantBadgeProps) {
       padding={{ vertical: 4, horizontal: 8 }}
       fill={getBackgroundColor()}
       cornerRadius={12}
+      tooltip={getTooltipText()}
     >
       <Text fontSize={12} fill="#FFFFFF" fontWeight="bold">
         {getDisplayText()}
