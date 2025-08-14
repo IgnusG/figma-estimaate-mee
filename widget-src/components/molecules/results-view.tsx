@@ -3,6 +3,7 @@ const { AutoLayout, Text } = widget;
 
 import { VoteResultGroup } from "./vote-result-group";
 import { ActionButton } from "../atoms/action-button";
+import { CardDisplay } from "../atoms/card-display";
 import {
   VoteResult,
   Participant,
@@ -10,7 +11,11 @@ import {
   SyncedMapLike,
   PokerWinner,
 } from "../../utils/types";
-import { determinePokerWinner, getPokerHandName, sortCards, getCardSymbol } from "../../utils/card-utils";
+import {
+  determinePokerWinner,
+  getPokerHandName,
+  sortCards,
+} from "../../utils/card-utils";
 
 export interface ResultsViewProps {
   voteResults: VoteResult[];
@@ -25,16 +30,19 @@ export function ResultsView(props: ResultsViewProps) {
   // Get non-voters from the snapshot
   const nonVoters =
     props.participantsSnapshot?.filter(
-      (participant) => !props.votes.get(participant.userId),
+      (participant) => !props.votes.get(participant.userId)
     ) || [];
 
   // Calculate consensus and spread metrics
-  const totalVotes = props.voteResults.reduce((sum, result) => sum + result.count, 0);
+  const totalVotes = props.voteResults.reduce(
+    (sum, result) => sum + result.count,
+    0
+  );
   const hasConsensus = props.voteResults.length === 1 && nonVoters.length === 0;
-  const mostVotes = Math.max(...props.voteResults.map(r => r.count));
-  const topChoice = props.voteResults.find(r => r.count === mostVotes);
+  const mostVotes = Math.max(...props.voteResults.map((r) => r.count));
+  const topChoice = props.voteResults.find((r) => r.count === mostVotes);
   const isSpread = props.voteResults.length > 2;
-  
+
   // Get result message and emoji based on voting pattern
   const getResultSummary = () => {
     if (hasConsensus) {
@@ -42,7 +50,11 @@ export function ResultsView(props: ResultsViewProps) {
     } else if (props.voteResults.length === 2) {
       return { emoji: "⚖️", message: "Split Decision", color: "#FFC107" };
     } else if (isSpread) {
-      return { emoji: "🌈", message: "Wide Range of Opinions", color: "#17A2B8" };
+      return {
+        emoji: "🌈",
+        message: "Wide Range of Opinions",
+        color: "#17A2B8",
+      };
     } else {
       return { emoji: "🤔", message: "Mixed Results", color: "#6C757D" };
     }
@@ -52,17 +64,18 @@ export function ResultsView(props: ResultsViewProps) {
 
   // Get participants with cards for poker game
   const participantsWithCards = (props.participantsSnapshot || [])
-    .filter(participant => participant.cards && participant.cards.length > 0)
-    .map(participant => ({
+    .filter((participant) => participant.cards && participant.cards.length > 0)
+    .map((participant) => ({
       userId: participant.userId,
       userName: participant.userName,
-      cards: participant.cards!
+      cards: participant.cards!,
     }));
 
   // Determine poker winner if showing poker results
-  const pokerWinner: PokerWinner | null = props.showPokerResults && participantsWithCards.length > 0
-    ? determinePokerWinner(participantsWithCards)
-    : null;
+  const pokerWinner: PokerWinner | null =
+    props.showPokerResults && participantsWithCards.length > 0
+      ? determinePokerWinner(participantsWithCards)
+      : null;
 
   return (
     <AutoLayout
@@ -73,15 +86,26 @@ export function ResultsView(props: ResultsViewProps) {
       cornerRadius={12}
       stroke="#E6E6E6"
     >
-      <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
+      <AutoLayout
+        direction="vertical"
+        spacing={8}
+        horizontalAlignItems="center"
+      >
         <Text fontSize={32} horizontalAlignText="center">
           {summary.emoji}
         </Text>
-        <Text fontSize={24} fontWeight="bold" horizontalAlignText="center" fill={summary.color}>
+        <Text
+          fontSize={24}
+          fontWeight="bold"
+          horizontalAlignText="center"
+          fill={summary.color}
+        >
           {summary.message}
         </Text>
         <Text fontSize={16} fill="#666666" horizontalAlignText="center">
-          {totalVotes} vote{totalVotes !== 1 ? 's' : ''} • {props.voteResults.length} unique value{props.voteResults.length !== 1 ? 's' : ''}
+          {totalVotes} vote{totalVotes !== 1 ? "s" : ""} •{" "}
+          {props.voteResults.length} unique value
+          {props.voteResults.length !== 1 ? "s" : ""}
         </Text>
       </AutoLayout>
 
@@ -95,8 +119,14 @@ export function ResultsView(props: ResultsViewProps) {
           cornerRadius={8}
           width="fill-parent"
         >
-          <Text fontSize={14} fontWeight="bold" fill="#0C5AA6" horizontalAlignText="center">
-            💡 Most Popular: {topChoice.value} ({topChoice.count} vote{topChoice.count !== 1 ? 's' : ''})
+          <Text
+            fontSize={14}
+            fontWeight="bold"
+            fill="#0C5AA6"
+            horizontalAlignText="center"
+          >
+            💡 Most Popular: {topChoice.value} ({topChoice.count} vote
+            {topChoice.count !== 1 ? "s" : ""})
           </Text>
           {isSpread && (
             <Text fontSize={12} fill="#0C5AA6" horizontalAlignText="center">
@@ -151,29 +181,37 @@ export function ResultsView(props: ResultsViewProps) {
       </AutoLayout>
 
       {/* Poker Cards Section */}
-      {participantsWithCards.length > 0 && !props.showPokerResults && props.onRevealCards && (
-        <AutoLayout
-          direction="vertical"
-          spacing={8}
-          padding={12}
-          fill="#F0F8FF"
-          cornerRadius={8}
-          width="fill-parent"
-        >
-          <Text fontSize={16} fontWeight="bold" fill="#0C5AA6" horizontalAlignText="center">
-            🃏 Poker Cards Ready!
-          </Text>
-          <Text fontSize={14} fill="#0C5AA6" horizontalAlignText="center">
-            {participantsWithCards.length} player{participantsWithCards.length !== 1 ? 's' : ''} have cards
-          </Text>
-          <ActionButton
-            text="Reveal Cards & Determine Winner"
-            variant="secondary"
-            size="medium"
-            onClick={props.onRevealCards}
-          />
-        </AutoLayout>
-      )}
+      {participantsWithCards.length > 0 &&
+        !props.showPokerResults &&
+        props.onRevealCards && (
+          <AutoLayout
+            direction="vertical"
+            spacing={8}
+            padding={12}
+            fill="#F0F8FF"
+            cornerRadius={8}
+            width="fill-parent"
+          >
+            <Text
+              fontSize={16}
+              fontWeight="bold"
+              fill="#0C5AA6"
+              horizontalAlignText="center"
+            >
+              🃏 Poker Cards Ready!
+            </Text>
+            <Text fontSize={14} fill="#0C5AA6" horizontalAlignText="center">
+              {participantsWithCards.length} player
+              {participantsWithCards.length !== 1 ? "s" : ""} have cards
+            </Text>
+            <ActionButton
+              text="Reveal Cards & Determine Winner"
+              variant="secondary"
+              size="medium"
+              onClick={props.onRevealCards}
+            />
+          </AutoLayout>
+        )}
 
       {/* Poker Results */}
       {props.showPokerResults && pokerWinner && (
@@ -184,23 +222,51 @@ export function ResultsView(props: ResultsViewProps) {
           fill="#E8F5E8"
           cornerRadius={8}
           width="fill-parent"
+          horizontalAlignItems="center"
         >
-          <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
+          <AutoLayout
+            direction="vertical"
+            spacing={8}
+            horizontalAlignItems="center"
+          >
             <Text fontSize={24}>🏆</Text>
-            <Text fontSize={18} fontWeight="bold" fill="#28A745" horizontalAlignText="center">
+            <Text
+              fontSize={18}
+              fontWeight="bold"
+              fill="#28A745"
+              horizontalAlignText="center"
+            >
               Poker Winner: {pokerWinner.userName}
             </Text>
             <Text fontSize={14} fill="#28A745" horizontalAlignText="center">
               {getPokerHandName(pokerWinner.hand.hand)}
             </Text>
-            <Text fontSize={12} fill="#666" horizontalAlignText="center">
-              Cards: {sortCards(pokerWinner.cards).map(card => getCardSymbol(card)).join(", ")}
-            </Text>
+            <AutoLayout
+              direction="horizontal"
+              spacing={8}
+              horizontalAlignItems="center"
+            >
+              <Text fontSize={12} fill="#666">
+                Cards:
+              </Text>
+              {sortCards(pokerWinner.cards).map((card) => (
+                <CardDisplay key={card.id} card={card} />
+              ))}
+            </AutoLayout>
           </AutoLayout>
 
           {/* Show all participants' cards */}
-          <AutoLayout direction="vertical" spacing={8} horizontalAlignItems="center">
-            <Text fontSize={14} fontWeight="bold" fill="#28A745" horizontalAlignText="center">
+          <AutoLayout
+            direction="vertical"
+            spacing={8}
+            horizontalAlignItems="center"
+          >
+            <Text
+              fontSize={14}
+              fontWeight="bold"
+              fill="#28A745"
+              horizontalAlignText="center"
+            >
               All Player Cards:
             </Text>
             {participantsWithCards
@@ -209,23 +275,33 @@ export function ResultsView(props: ResultsViewProps) {
                 if (b.userId === pokerWinner.userId) return 1;
                 return a.userName.localeCompare(b.userName);
               })
-              .map(participant => (
+              .map((participant) => (
                 <AutoLayout
                   key={participant.userId}
                   direction="horizontal"
                   spacing={8}
                   padding={8}
-                  fill={participant.userId === pokerWinner.userId ? "#D4F5D4" : "#F5F5F5"}
+                  fill={
+                    participant.userId === pokerWinner.userId
+                      ? "#D4F5D4"
+                      : "#F5F5F5"
+                  }
                   cornerRadius={4}
-                  width="fill-parent"
+                  width="hug-contents"
                   horizontalAlignItems="center"
                 >
                   <Text fontSize={12} fontWeight="bold" fill="#333">
                     {participant.userName}:
                   </Text>
-                  <Text fontSize={12} fill="#666">
-                    {sortCards(participant.cards).map(card => getCardSymbol(card)).join(", ")}
-                  </Text>
+                  <AutoLayout
+                    direction="horizontal"
+                    spacing={6}
+                    horizontalAlignItems="center"
+                  >
+                    {sortCards(participant.cards).map((card) => (
+                      <CardDisplay key={card.id} card={card} />
+                    ))}
+                  </AutoLayout>
                 </AutoLayout>
               ))}
           </AutoLayout>
