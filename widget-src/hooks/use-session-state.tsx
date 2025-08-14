@@ -27,6 +27,7 @@ export function useSessionState(
   votes: SyncedMapLike<Vote>,
   voteResults: VoteResult[],
   setShowPokerResults?: (show: boolean) => void,
+  pokerEnabled?: boolean,
 ): UseSessionStateReturn {
   const startSession = () => {
     try {
@@ -69,35 +70,39 @@ export function useSessionState(
       if (userId) {
         debug.log("Revealing results");
 
-        // Distribute cards to participants who voted with consensus-based quality
-        const voterIds = votes.keys();
-        debug.log("Distributing consensus-based cards to voters:", voterIds);
+        // Distribute cards to participants who voted (only if poker is enabled)
+        if (pokerEnabled) {
+          const voterIds = votes.keys();
+          debug.log("Distributing consensus-based cards to voters:", voterIds);
 
-        for (const voterId of voterIds) {
-          const participant = participants.get(voterId);
-          const vote = votes.get(voterId);
-          if (participant && vote) {
-            const { cards: updatedCards, reason } =
-              addCardToParticipantWithQuality(
-                participant.cards,
-                vote.value,
-                voteResults,
+          for (const voterId of voterIds) {
+            const participant = participants.get(voterId);
+            const vote = votes.get(voterId);
+            if (participant && vote) {
+              const { cards: updatedCards, reason } =
+                addCardToParticipantWithQuality(
+                  participant.cards,
+                  vote.value,
+                  voteResults,
+                );
+
+              participants.set(voterId, {
+                ...participant,
+                cards: updatedCards,
+              });
+
+              debug.log(
+                `Added card to ${participant.userName} (voted ${vote.value}), now has ${updatedCards.length} cards - ${reason}`,
               );
 
-            participants.set(voterId, {
-              ...participant,
-              cards: updatedCards,
-            });
-
-            debug.log(
-              `Added card to ${participant.userName} (voted ${vote.value}), now has ${updatedCards.length} cards - ${reason}`,
-            );
-
-            // Show personalized notification to user
-            if (figma.currentUser?.id === voterId) {
-              figma.notify(reason, { timeout: 5000 });
+              // Show personalized notification to user
+              if (figma.currentUser?.id === voterId) {
+                figma.notify(reason, { timeout: 5000 });
+              }
             }
           }
+        } else {
+          debug.log("Poker disabled - skipping card distribution");
         }
 
         // Capture snapshot of current participants AFTER card distribution

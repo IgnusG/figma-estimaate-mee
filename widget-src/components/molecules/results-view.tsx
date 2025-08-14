@@ -24,6 +24,7 @@ export interface ResultsViewProps {
   votes: SyncedMapLike<Vote>;
   showPokerResults?: boolean;
   onRevealCards?: () => void;
+  pokerEnabled?: boolean;
 }
 
 export function ResultsView(props: ResultsViewProps) {
@@ -62,18 +63,24 @@ export function ResultsView(props: ResultsViewProps) {
 
   const summary = getResultSummary();
 
-  // Get participants with cards for poker game
-  const participantsWithCards = (props.participantsSnapshot || [])
-    .filter((participant) => participant.cards && participant.cards.length > 0)
-    .map((participant) => ({
-      userId: participant.userId,
-      userName: participant.userName,
-      cards: participant.cards!,
-    }));
+  // Get participants with cards for poker game (only if poker is enabled)
+  const participantsWithCards = props.pokerEnabled
+    ? (props.participantsSnapshot || [])
+        .filter(
+          (participant) => participant.cards && participant.cards.length > 0,
+        )
+        .map((participant) => ({
+          userId: participant.userId,
+          userName: participant.userName,
+          cards: participant.cards!,
+        }))
+    : [];
 
   // Determine poker winner if showing poker results
   const pokerWinner: PokerWinner | null =
-    props.showPokerResults && participantsWithCards.length > 0
+    props.pokerEnabled &&
+    props.showPokerResults &&
+    participantsWithCards.length > 0
       ? determinePokerWinner(participantsWithCards)
       : null;
 
@@ -182,7 +189,8 @@ export function ResultsView(props: ResultsViewProps) {
       </AutoLayout>
 
       {/* Poker Cards Section */}
-      {participantsWithCards.length > 0 &&
+      {props.pokerEnabled &&
+        participantsWithCards.length > 0 &&
         !props.showPokerResults &&
         props.onRevealCards && (
           <AutoLayout
@@ -215,7 +223,7 @@ export function ResultsView(props: ResultsViewProps) {
         )}
 
       {/* Poker Results */}
-      {props.showPokerResults && pokerWinner && (
+      {props.pokerEnabled && props.showPokerResults && pokerWinner && (
         <AutoLayout
           direction="vertical"
           spacing={12}
