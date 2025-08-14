@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "ci": "npm run tsc && npm run lint && npm run test && npm run build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "author": "",
   "license": "",
@@ -27,7 +28,9 @@
     "@vitest/ui": "^3.2.4",
     "esbuild": "*",
     "eslint": "^8.54.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
     "typescript": "^5.3.2",
     "vitest": "^3.2.4"
@@ -53,5 +56,11 @@
         }
       ]
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }
