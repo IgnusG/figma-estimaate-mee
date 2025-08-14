@@ -138,6 +138,18 @@ export function useSessionState(
         for (const key of votes.keys()) {
           votes.delete(key);
         }
+
+        // Reset card replacement counters for all participants
+        for (const participantId of participants.keys()) {
+          const participant = participants.get(participantId);
+          if (participant) {
+            participants.set(participantId, {
+              ...participant,
+              cardReplacementsUsed: 0,
+            });
+          }
+        }
+
         setSessionState({
           ...sessionState,
           status: "voting",
@@ -193,6 +205,17 @@ export function useSessionState(
         participant.cards.length === 0
       ) {
         debug.log("No cards to replace for user:", userId);
+        figma.notify("You don't have any cards to replace.", { timeout: 3000 });
+        return;
+      }
+
+      // Check if user has already replaced a card this turn
+      const replacementsUsed = participant.cardReplacementsUsed || 0;
+      if (replacementsUsed >= 1) {
+        figma.notify(
+          "You can only replace one card per turn. Wait for the next round!",
+          { timeout: 4000 },
+        );
         return;
       }
 
@@ -200,10 +223,11 @@ export function useSessionState(
       participants.set(userId, {
         ...participant,
         cards: updatedCards,
+        cardReplacementsUsed: replacementsUsed + 1,
       });
 
       debug.log(
-        `Replaced random card for ${participant.userName}, still has ${updatedCards.length} cards`,
+        `Replaced random card for ${participant.userName}, still has ${updatedCards.length} cards, used ${replacementsUsed + 1} replacements`,
       );
       figma.notify(
         `Replaced one card! You now have ${updatedCards.length} cards.`,

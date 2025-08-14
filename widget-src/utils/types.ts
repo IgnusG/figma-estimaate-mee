@@ -16,6 +16,7 @@ export interface Participant {
   userName: string;
   joinedAt: number;
   cards?: PlayingCard[];
+  cardReplacementsUsed?: number; // Track how many card replacements used this turn
 }
 
 export interface VoteResult {
