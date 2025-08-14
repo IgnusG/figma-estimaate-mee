@@ -69,9 +69,44 @@ Widget (organisms/widget.tsx)
 
 ## Testing
 
-- Uses Vitest for testing
-- Test configuration in `vitest.config.ts`
-- Tests located in `widget-src/code.test.ts`
+**You should ensure tests pass before completing any task. If tests are failing due to unrelated changes, notify the user and ask whether you should fix them - don't ignore failing tests.**
+
+### Test Commands
+
+| Command               | Purpose                                    |
+| --------------------- | ------------------------------------------ |
+| `npm run test`        | Run all tests once                         |
+| `npm run test:ui`     | Run tests with interactive UI             |
+| `npm test -- watch`   | Run tests in watch mode                    |
+| `npm test -- <pattern>` | Run specific test files matching pattern |
+
+### Test Structure
+
+- **Framework**: Vitest for fast unit testing
+- **Configuration**: `vitest.config.ts`
+- **Test Files**: Located alongside source files with `.test.ts` suffix
+- **Coverage**: Tests cover hooks, utilities, and core functionality
+
+### Test Categories
+
+1. **Core Widget Tests** (`widget-src/code.test.ts`): Basic widget functionality
+2. **Hook Tests** (`widget-src/hooks/`): State management and voting logic
+3. **Utility Tests** (`widget-src/utils/`): Card gamification and vote processing
+4. **Multi-user Tests**: Real-time collaboration scenarios
+
+### When to Run Tests
+
+- **Before committing**: Always run `npm run test` to ensure no regressions
+- **After major changes**: Run full test suite to verify functionality
+- **During development**: Use watch mode for immediate feedback
+- **When debugging**: Run specific test files to isolate issues
+
+### Test Expectations
+
+- All tests must pass (72/72 tests currently passing)
+- New features should include corresponding tests
+- Tests should cover edge cases and error conditions
+- Mock external dependencies (Figma API, user interactions)
 
 ## Build Output
 
