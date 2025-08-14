@@ -39,6 +39,10 @@ export function Widget() {
     "showPokerResults",
     false,
   );
+  const [pokerEnabled, setPokerEnabled] = useSyncedState<boolean>(
+    "pokerEnabled",
+    true,
+  );
   const votes = useSyncedMap<Vote>("votes");
   const participants = useSyncedMap<Participant>("participants");
 
@@ -130,11 +134,32 @@ export function Widget() {
     votes,
     votingControls.groupedResults,
     setShowPokerResults,
+    pokerEnabled,
   );
 
   // Reveal cards handler
   const handleRevealCards = () => {
     setShowPokerResults(true);
+  };
+
+  // Poker toggle handler
+  const handlePokerToggle = () => {
+    const newPokerEnabled = !pokerEnabled;
+    setPokerEnabled(newPokerEnabled);
+
+    if (!newPokerEnabled) {
+      // Clear all cards and poker results when disabling
+      setShowPokerResults(false);
+      for (const participantId of participants.keys()) {
+        const participant = participants.get(participantId);
+        if (participant && participant.cards) {
+          participants.set(participantId, {
+            ...participant,
+            cards: undefined,
+          });
+        }
+      }
+    }
   };
 
   // Clear recent votes after 1 second
@@ -169,6 +194,7 @@ export function Widget() {
         votes={votes}
         showPokerResults={showPokerResults}
         onRevealCards={handleRevealCards}
+        pokerEnabled={pokerEnabled}
       />
     );
   }
@@ -224,28 +250,48 @@ export function Widget() {
         </Text>
         <AutoLayout horizontalAlignItems="end" width="fill-parent" spacing={8}>
           <AutoLayout
-            onClick={sessionControls.replaceRandomCard}
-            padding={4}
-            cornerRadius={4}
-            fill="#FFF3E0"
-            stroke="#FFB74D"
-            strokeWidth={1}
+            direction="vertical"
+            spacing={4}
+            horizontalAlignItems="end"
           >
-            <Text fontSize={10} fill="#E65100">
-              🎴 Replace Card
-            </Text>
-          </AutoLayout>
-          <AutoLayout
-            onClick={() => setDebugEnabled(!debugEnabled)}
-            padding={4}
-            cornerRadius={4}
-            fill={debugEnabled ? "#E6F7FF" : "#F5F5F5"}
-            stroke={debugEnabled ? "#1890FF" : "#D9D9D9"}
-            strokeWidth={1}
-          >
-            <Text fontSize={10} fill={debugEnabled ? "#1890FF" : "#8C8C8C"}>
-              {debugEnabled ? "🐛 Debug on" : "Debug off"}
-            </Text>
+            <AutoLayout direction="horizontal" spacing={8}>
+              <AutoLayout
+                onClick={sessionControls.replaceRandomCard}
+                padding={4}
+                cornerRadius={4}
+                fill="#FFF3E0"
+                stroke="#FFB74D"
+                strokeWidth={1}
+              >
+                <Text fontSize={10} fill="#E65100">
+                  🎴 Replace Card
+                </Text>
+              </AutoLayout>
+              <AutoLayout
+                onClick={() => setDebugEnabled(!debugEnabled)}
+                padding={4}
+                cornerRadius={4}
+                fill={debugEnabled ? "#E6F7FF" : "#F5F5F5"}
+                stroke={debugEnabled ? "#1890FF" : "#D9D9D9"}
+                strokeWidth={1}
+              >
+                <Text fontSize={10} fill={debugEnabled ? "#1890FF" : "#8C8C8C"}>
+                  {debugEnabled ? "🐛 Debug on" : "Debug off"}
+                </Text>
+              </AutoLayout>
+            </AutoLayout>
+            <AutoLayout
+              onClick={handlePokerToggle}
+              padding={4}
+              cornerRadius={4}
+              fill={pokerEnabled ? "#E8F5E8" : "#FFEBEE"}
+              stroke={pokerEnabled ? "#4CAF50" : "#F44336"}
+              strokeWidth={1}
+            >
+              <Text fontSize={10} fill={pokerEnabled ? "#2E7D32" : "#C62828"}>
+                {pokerEnabled ? "🃏 Poker on" : "🚫 Poker off"}
+              </Text>
+            </AutoLayout>
           </AutoLayout>
         </AutoLayout>
       </AutoLayout>
