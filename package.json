@@ -1,6 +1,6 @@
 {
   "name": "Estimatee-Mee",
-  "version": "1.0.0",
+  "version": "6.0.0",
   "description": "Your Figma widget",
   "private": true,
   "scripts": {
@@ -21,8 +21,8 @@
     "version-packages": "changeset version",
     "release": "npm run build && changeset tag"
   },
-  "author": "",
-  "license": "",
+  "author": "IgnusG",
+  "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
     "@figma/eslint-plugin-figma-plugins": "*",
