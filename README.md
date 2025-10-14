@@ -1,3 +1,13 @@
+# Estimatee-Mee
+
+A Figma widget for conducting estimation sessions (story points, planning poker) with real-time collaboration.
+
+## Contributing
+
+For development setup, workflow, and release process, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Quick Start
+
 Below are the steps to get your widget running. You can also find instructions at:
 
 https://www.figma.com/widget-docs/setup-guide/

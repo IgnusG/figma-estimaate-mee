@@ -2,6 +2,7 @@
   "name": "Estimatee-Mee",
   "version": "1.0.0",
   "description": "Your Figma widget",
+  "private": true,
   "scripts": {
     "build": "esbuild widget-src/code.tsx --bundle --outfile=dist/code.js --target=es6",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
@@ -15,11 +16,15 @@
     "ci": "npm run tsc && npm run lint && npm run test && npm run build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run build && changeset tag"
   },
   "author": "",
   "license": "",
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@figma/eslint-plugin-figma-plugins": "*",
     "@figma/plugin-typings": "*",
     "@figma/widget-typings": "*",

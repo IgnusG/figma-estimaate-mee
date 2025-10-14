@@ -1,0 +1,124 @@
+name: Changeset Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    name: Check for changeset
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for changesets
+        id: changeset_check
+        run: |
+          if git diff --name-only origin/main... | grep -q "^\.changeset/.*\.md$"; then
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "✅ Changeset found"
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No changeset found"
+          fi
+
+      - name: Comment on PR (no changeset)
+        if: steps.changeset_check.outputs.found == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `## ⚠️ No Changeset Found
+
+            This PR doesn't include a changeset. If your changes affect functionality, please add one:
+
+            \`\`\`bash
+            npm run changeset
+            \`\`\`
+
+            <details>
+            <summary>When do I need a changeset?</summary>
+
+            **Add a changeset for:**
+            - ✅ New features
+            - ✅ Bug fixes
+            - ✅ Breaking changes
+            - ✅ Performance improvements
+            - ✅ User-facing changes
+
+            **Skip changeset for:**
+            - ❌ Documentation updates only
+            - ❌ Test changes only
+            - ❌ Build/CI configuration
+            - ❌ Code refactoring with no behavioral changes
+
+            **For non-functional changes, create an empty changeset:**
+            \`\`\`bash
+            npx changeset --empty
+            \`\`\`
+
+            </details>
+
+            <sub>This check passes with a warning. Add a changeset if needed before merging.</sub>`;
+
+            // Check if we already commented
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('No Changeset Found')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: message
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: message
+              });
+            }
+
+      - name: Add warning annotation
+        if: steps.changeset_check.outputs.found == 'false'
+        run: |
+          echo "::warning::No changeset found. Consider adding one if this PR includes functional changes."
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.changeset_check.outputs.found }}" == "true" ]; then
+            echo "### ✅ Changeset Found" >> $GITHUB_STEP_SUMMARY
+            echo "This PR includes a changeset for proper versioning." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ No Changeset" >> $GITHUB_STEP_SUMMARY
+            echo "This PR doesn't include a changeset. If this is intentional (docs/tests only), no action needed." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To add a changeset: \`npm run changeset\`" >> $GITHUB_STEP_SUMMARY
+          fi
