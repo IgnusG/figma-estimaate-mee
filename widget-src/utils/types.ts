@@ -15,6 +15,7 @@ export interface Participant {
   userId: string;
   userName: string;
   joinedAt: number;
+  lastActiveTime?: number; // Track when user was last seen active
   cards?: PlayingCard[];
   cardReplacementsUsed?: number; // Track how many card replacements used this turn
 }

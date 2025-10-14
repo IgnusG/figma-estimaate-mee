@@ -45,18 +45,28 @@ export function useUserPolling(
           previousActiveUserIds: activeUserIds,
         });
 
-        // Always sync participants
+        // Always sync participants and update lastActiveTime for active users
         activeUsers.forEach((user) => {
-          if (user.id && !participants.get(user.id)) {
-            debug.log(`➕ Adding user:`, {
-              userId: user.id,
-              userName: user.name,
-            });
-            participants.set(user.id, {
-              userId: user.id,
-              userName: user.name || "Anonymous",
-              joinedAt: Date.now(),
-            });
+          if (user.id) {
+            const existingParticipant = participants.get(user.id);
+            if (!existingParticipant) {
+              debug.log(`➕ Adding new user:`, {
+                userId: user.id,
+                userName: user.name,
+              });
+              participants.set(user.id, {
+                userId: user.id,
+                userName: user.name || "Anonymous",
+                joinedAt: Date.now(),
+                lastActiveTime: Date.now(),
+              });
+            } else {
+              // Update lastActiveTime for existing participant
+              participants.set(user.id, {
+                ...existingParticipant,
+                lastActiveTime: Date.now(),
+              });
+            }
           }
         });
 
@@ -78,18 +88,44 @@ export function useUserPolling(
             left: usersLeft,
           });
 
-          // Remove users who left (preserve votes)
+          // Mark users who left as inactive (don't delete them yet)
           usersLeft.forEach((leftUserId) => {
             const participant = participants.get(leftUserId);
-            const hasVoted = false; // We don't have access to votes here, but this is handled in main component
-            if (participant && !hasVoted) {
-              debug.log(`➖ Removing user:`, leftUserId);
-              participants.delete(leftUserId);
+            if (participant) {
+              debug.log(`⏰ User left, marking as inactive:`, leftUserId);
+              // Keep participant but don't update lastActiveTime (it will become stale)
+              // Cards are preserved in the participant object
             }
           });
 
           // Update active user IDs
           setActiveUserIds([...currentUserIds]);
+        }
+
+        // Periodic cleanup: Remove participants who have been inactive for more than 10 minutes
+        const GRACE_PERIOD_MS = 10 * 60 * 1000; // 10 minutes
+        const now = Date.now();
+        const staleParticipantIds: string[] = [];
+
+        for (const participantId of participants.keys()) {
+          const participant = participants.get(participantId);
+          if (participant && participant.lastActiveTime) {
+            const inactiveTime = now - participant.lastActiveTime;
+            if (inactiveTime > GRACE_PERIOD_MS) {
+              staleParticipantIds.push(participantId);
+            }
+          }
+        }
+
+        // Remove stale participants
+        if (staleParticipantIds.length > 0) {
+          debug.log(
+            `🧹 Cleaning up ${staleParticipantIds.length} stale participants:`,
+            staleParticipantIds,
+          );
+          staleParticipantIds.forEach((staleId) => {
+            participants.delete(staleId);
+          });
         }
 
         // Schedule next poll cycle using waitForTask + timeout + re-render

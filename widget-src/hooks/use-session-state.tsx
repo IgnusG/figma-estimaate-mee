@@ -36,11 +36,15 @@ export function useSessionState(
 
       debug.log("Starting session:", { userId, userName });
 
-      // Add user as participant
+      // Add user as participant (or preserve existing cards if rejoining)
+      const existingParticipant = participants.get(userId);
       participants.set(userId, {
         userId,
         userName,
-        joinedAt: Date.now(),
+        joinedAt: existingParticipant?.joinedAt || Date.now(),
+        lastActiveTime: Date.now(),
+        cards: existingParticipant?.cards, // Preserve existing cards
+        cardReplacementsUsed: existingParticipant?.cardReplacementsUsed,
       });
 
       setSessionState({
@@ -51,10 +55,14 @@ export function useSessionState(
       debug.error("Error starting session:", error);
       // Fallback without currentUser
       const fallbackId = `user-${Date.now()}`;
+      const existingFallbackParticipant = participants.get(fallbackId);
       participants.set(fallbackId, {
         userId: fallbackId,
         userName: "Anonymous",
-        joinedAt: Date.now(),
+        joinedAt: existingFallbackParticipant?.joinedAt || Date.now(),
+        lastActiveTime: Date.now(),
+        cards: existingFallbackParticipant?.cards, // Preserve existing cards
+        cardReplacementsUsed: existingFallbackParticipant?.cardReplacementsUsed,
       });
       setSessionState({
         status: "voting",
@@ -205,12 +213,14 @@ export function useSessionState(
       const userId = figma.currentUser?.id || `user-${Date.now()}`;
       const userName = figma.currentUser?.name || "Anonymous";
 
-      // Add as participant if not already present
-      if (!participants.get(userId)) {
+      // Add as participant or update existing participant
+      const existingParticipant = participants.get(userId);
+      if (!existingParticipant) {
         participants.set(userId, {
           userId,
           userName,
           joinedAt: Date.now(),
+          lastActiveTime: Date.now(),
         });
 
         // Update session participant list
@@ -221,6 +231,18 @@ export function useSessionState(
             participants: [...currentParticipants, userId],
           });
         }
+      } else {
+        // Update lastActiveTime for existing participant (preserves cards)
+        participants.set(userId, {
+          ...existingParticipant,
+          userName, // Update name in case it changed
+          lastActiveTime: Date.now(),
+        });
+
+        debug.log(
+          `👋 User rejoined with ${existingParticipant.cards?.length || 0} existing cards:`,
+          userId,
+        );
       }
     } catch (error) {
       debug.error("Error joining session:", error);
