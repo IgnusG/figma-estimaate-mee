@@ -68,11 +68,22 @@ export function Widget() {
           userName,
         });
 
+        // Check if participant exists (could be rejoining within grace period)
+        const existingParticipant = participants.get(figma.currentUser.id);
         participants.set(figma.currentUser.id, {
           userId: figma.currentUser.id,
           userName: userName,
-          joinedAt: Date.now(),
+          joinedAt: existingParticipant?.joinedAt || Date.now(),
+          lastActiveTime: Date.now(),
+          cards: existingParticipant?.cards, // Preserve existing cards
+          cardReplacementsUsed: existingParticipant?.cardReplacementsUsed,
         });
+
+        if (existingParticipant?.cards?.length) {
+          debug.log(
+            `User rejoined with ${existingParticipant.cards.length} preserved cards`,
+          );
+        }
 
         // Also ensure they're in the session participants list
         if (!sessionStateData.participants.includes(figma.currentUser.id)) {
@@ -114,7 +125,11 @@ export function Widget() {
         const participant = participants.get(leftUserId);
         const hasVoted = votes.get(leftUserId);
         if (participant && !hasVoted) {
-          participants.delete(leftUserId);
+          // Don't delete participants immediately - let useUserPolling handle cleanup after grace period
+          // This preserves their cards for potential rejoining
+          console.log(
+            `User ${leftUserId} left but keeping participant record for grace period`,
+          );
         }
       });
     }

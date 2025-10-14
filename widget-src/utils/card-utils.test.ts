@@ -126,6 +126,16 @@ describe("Card Utils", () => {
     });
 
     it("should remove random card when at capacity", () => {
+      // Mock Math.random to ensure predictable behavior
+      const originalRandom = Math.random;
+      let callCount = 0;
+      Math.random = vi.fn(() => {
+        callCount++;
+        // First call: choose a specific card rank/suit that's not in existing cards
+        // Second call: choose removal index
+        return callCount === 1 ? 0.1 : 0.0; // Will pick first card (index 0) and first suit/rank
+      });
+
       const existingCards: PlayingCard[] = [
         { suit: "hearts", rank: 2, id: "2-hearts" },
         { suit: "clubs", rank: "A", id: "A-clubs" },
@@ -138,11 +148,14 @@ describe("Card Utils", () => {
       // Should have exactly 5 cards
       expect(result).toHaveLength(5);
 
-      // Should contain a new card (not all original cards)
+      // Should contain a new card (the first card from deck: 2-clubs)
       const originalIds = existingCards.map((c) => c.id);
       const resultIds = result.map((c) => c.id);
       const hasNewCard = resultIds.some((id) => !originalIds.includes(id));
       expect(hasNewCard).toBe(true);
+
+      // Restore original Math.random
+      Math.random = originalRandom;
     });
   });
 
