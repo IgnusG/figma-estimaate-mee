@@ -81,14 +81,12 @@ jobs:
           # Extract changelog for current version
           CHANGELOG=$(awk '/^## / { if (p) { exit }; if ($2 == "'$VERSION'") { p=1; next } } p && NF' CHANGELOG.md || echo "No changelog entry found for version $VERSION")
 
-          # Escape for GitHub Actions
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Use heredoc to preserve newlines properly
+          {
+            echo "content<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
