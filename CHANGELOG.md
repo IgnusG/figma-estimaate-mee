@@ -1,5 +1,11 @@
 # Estimatee-Mee
 
+## 8.0.0
+
+### Major Changes
+
+- 2ed266f: Fix error on interaction
+
 ## 7.0.0
 
 ### Major Changes
