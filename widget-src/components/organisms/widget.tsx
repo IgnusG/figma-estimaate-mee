@@ -108,32 +108,8 @@ export function Widget() {
     setPollingTrigger,
   );
 
-  // Handle user cleanup for votes when users leave
-  useEffect(() => {
-    if (sessionStateData.status === "voting") {
-      // Remove users who left (preserve votes)
-      const activeUsers = figma.activeUsers || [];
-      const currentUserIds = activeUsers
-        .map((u) => u.id)
-        .filter((id) => id != null) as string[];
-
-      const usersLeft = activeUserIds.filter(
-        (id) => !currentUserIds.includes(id),
-      );
-
-      usersLeft.forEach((leftUserId) => {
-        const participant = participants.get(leftUserId);
-        const hasVoted = votes.get(leftUserId);
-        if (participant && !hasVoted) {
-          // Don't delete participants immediately - let useUserPolling handle cleanup after grace period
-          // This preserves their cards for potential rejoining
-          console.log(
-            `User ${leftUserId} left but keeping participant record for grace period`,
-          );
-        }
-      });
-    }
-  });
+  // NOTE: User cleanup is now handled by useUserPolling hook
+  // This effect has been removed to prevent CppVm conflicts
 
   // Custom function to add recent votes
   const addRecentVote = (userId: string, timestamp: number) => {

@@ -1,5 +1,5 @@
 const { widget } = figma;
-const { useEffect, waitForTask } = widget;
+const { useEffect } = widget;
 
 import { SessionStatus, Participant, SyncedMapLike } from "../utils/types";
 import { debug } from "../utils/debug";
@@ -13,6 +13,7 @@ export interface UseUserPollingReturn {
 // Global polling state
 let globalPollingCount = 0;
 let currentTimeout: ReturnType<typeof setTimeout> | null = null;
+let isPollingActive = false;
 
 export function useUserPolling(
   sessionStatus: SessionStatus,
@@ -23,6 +24,13 @@ export function useUserPolling(
 ): UseUserPollingReturn {
   useEffect(() => {
     if (sessionStatus === "voting") {
+      // Only start polling if it's not already active
+      if (isPollingActive) {
+        debug.log("⏭️ Skipping useEffect - polling already active");
+        return;
+      }
+
+      isPollingActive = true;
       globalPollingCount++;
       debug.log(`🔍 POLL #${globalPollingCount} - useEffect triggered`);
 
@@ -128,23 +136,15 @@ export function useUserPolling(
           });
         }
 
-        // Schedule next poll cycle using waitForTask + timeout + re-render
+        // Schedule next poll cycle using timeout + re-render
         debug.log(`⏰ Scheduling next poll cycle in 2 second`);
-
-        let promiseResolve: () => void;
-
-        waitForTask(
-          new Promise<void>((resolve) => {
-            promiseResolve = resolve;
-          }),
-        );
 
         currentTimeout = setTimeout(() => {
           if (sessionStatus === "voting") {
             debug.log(`🔄 Timeout fired - triggering re-render`);
+            isPollingActive = false; // Reset flag before triggering next poll
             setPollingTrigger((prev) => prev + 1); // This triggers useEffect -> new poll cycle
           }
-          promiseResolve();
         }, 2000);
       } catch (error) {
         debug.error(`❌ Poll #${globalPollingCount} error:`, error);
@@ -159,6 +159,7 @@ export function useUserPolling(
       if (globalPollingCount > 0) {
         debug.log("🛑 Resetting polling state");
         globalPollingCount = 0;
+        isPollingActive = false;
       }
     }
   });
