@@ -1,5 +1,5 @@
 const { widget } = figma;
-const { useEffect } = widget;
+const { useEffect, waitForTask } = widget;
 
 import { SessionStatus, Participant, SyncedMapLike } from "../utils/types";
 import { debug } from "../utils/debug";
@@ -139,12 +139,22 @@ export function useUserPolling(
         // Schedule next poll cycle using timeout + re-render
         debug.log(`⏰ Scheduling next poll cycle in 2 second`);
 
+        let promiseResolve: () => void;
+
+        // Use waitForTask to show "Running..." indicator in Figma
+        waitForTask(
+          new Promise<void>((resolve) => {
+            promiseResolve = resolve;
+          }),
+        );
+
         currentTimeout = setTimeout(() => {
           if (sessionStatus === "voting") {
             debug.log(`🔄 Timeout fired - triggering re-render`);
             isPollingActive = false; // Reset flag before triggering next poll
             setPollingTrigger((prev) => prev + 1); // This triggers useEffect -> new poll cycle
           }
+          promiseResolve();
         }, 2000);
       } catch (error) {
         debug.error(`❌ Poll #${globalPollingCount} error:`, error);
