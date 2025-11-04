@@ -1,5 +1,11 @@
 # Estimatee-Mee
 
+## 9.0.0
+
+### Major Changes
+
+- 3a86b6e: Fix slow updates due to missing lifecycle hooks
+
 ## 8.0.0
 
 ### Major Changes
